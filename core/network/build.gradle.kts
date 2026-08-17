@@ -31,6 +31,10 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
@@ -40,6 +44,12 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.okhttp)
+    // Not debug-only: OkHttpClientProvider references this class in code
+    // compiled for both variants, gating its *use* at runtime via
+    // BuildConfig.DEBUG rather than its presence at compile time. The
+    // interceptor itself is inert unless attached to a client.
+    implementation(libs.okhttp.logging.interceptor)
     testImplementation(libs.junit4)
     testImplementation(libs.mockk)
     testImplementation(libs.turbine)

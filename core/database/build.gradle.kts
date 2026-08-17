@@ -32,6 +32,15 @@ android {
     }
 }
 
+ksp {
+    // Room writes exported schema JSON here on every build; these get
+    // committed so `MigrationTestHelper` (added once the first real
+    // migration lands) can verify old-schema -> new-schema upgrades against
+    // a real historical snapshot instead of just the current schema.
+    arg("room.schemaLocation", "$projectDir/schemas")
+    arg("room.generateKotlin", "true")
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
