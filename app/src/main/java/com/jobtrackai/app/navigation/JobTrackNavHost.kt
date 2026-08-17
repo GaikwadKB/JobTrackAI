@@ -34,7 +34,8 @@ fun JobTrackNavHost(
                 navController.navigate(NavDestinations.Home) {
                     popUpTo(NavDestinations.AuthGraph) { inclusive = true }
                 }
-            }
+            },
+            navController = navController
         )
         
         homeScreen()

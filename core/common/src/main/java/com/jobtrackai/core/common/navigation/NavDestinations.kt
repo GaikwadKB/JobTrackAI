@@ -21,6 +21,9 @@ sealed interface NavDestinations {
     @Serializable
     data object Register : NavDestinations
 
+    @Serializable
+    data object ForgotPassword : NavDestinations
+
     /**
      * Main app graph (post-auth).
      */

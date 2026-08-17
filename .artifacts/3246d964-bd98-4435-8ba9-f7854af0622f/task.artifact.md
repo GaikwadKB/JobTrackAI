@@ -1,14 +1,14 @@
-# Tasks - Phase 4: Navigation Skeleton
+# Tasks - Phase 5: Authentication
 
-- `[x]` Define `NavDestinations` in `core:common`
-- `[x]` Implement feature navigation sub-graphs (placeholders)
-    - `[x]` Auth navigation
-    - `[x]` Home/Analytics navigation
-    - `[x]` Jobs navigation
-    - `[x]` Applications navigation
-    - `[x]` Interviews navigation
-    - `[x]` Profile navigation
-- `[x]` Implement `JobTrackNavigationBar` in `core:designsystem`
-- `[x]` Implement root `JobTrackNavHost` in `app`
-- `[x]` Update `MainActivity` to host navigation
-- `[x]` Verify navigation and backstack behavior
+- `[x]` Create `User` domain model in `core:common`
+- `[x]` Implement `FirebaseModule` in `core:di`
+- `[x]` Define `AuthRepository` in `feature:auth` (Domain)
+- `[x]` Implement `AuthUseCases` in `feature:auth` (Domain)
+- `[x]` Implement `FirebaseAuthRepository` in `feature:auth` (Data)
+- `[x]` Setup Hilt for `feature:auth`
+- `[x]` Implement `LoginViewModel` and `LoginScreen`
+- `[x]` Implement `RegisterViewModel` and `RegisterScreen`
+- `[x]` Implement `ForgotPasswordViewModel` and `ForgotPasswordScreen`
+- `[x]` Update `AuthNavigation` routes
+- `[x]` Verify session persistence in `MainActivity`
+- `[x]` Unit tests for Auth logic
