@@ -1,0 +1,52 @@
+# Gradle
+.gradle/
+build/
+*/build/
+*/*/build/
+local.properties
+gradle-app.setting
+.gradletasknamecache
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+.navigation/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Keystores — never commit signing material
+*.jks
+*.keystore
+keystore.properties
+
+# Firebase — contains project IDs/API keys tied to the Firebase project
+google-services.json
+GoogleService-Info.plist
+
+# Secrets / environment config
+secrets.properties
+*.env
+local.env
+
+# AI provider config (see core/di AIModule — keys are never hard-coded)
+ai_config.properties
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+
+# Build outputs
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Logs
+*.log
+
+# Generated docs
+/captures
