@@ -38,6 +38,13 @@ dependencies {
     implementation(project(":core:common"))
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.firestore.ktx)
+    implementation(libs.firebase.storage.ktx)
+
     testImplementation(libs.junit4)
     testImplementation(libs.mockk)
     testImplementation(libs.turbine)
