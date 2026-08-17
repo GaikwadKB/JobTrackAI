@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Minimal manifest-level theme. This only controls the window before
+        Compose content is set (status bar, splash background). The actual
+        Material3 color scheme, typography, and shapes are defined in
+        core/designsystem (Phase 3) and applied via JobTrackTheme { ... }
+        inside MainActivity's setContent block.
+    -->
+    <style name="Theme.JobTrackAI" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@android:color/white</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+</resources>
