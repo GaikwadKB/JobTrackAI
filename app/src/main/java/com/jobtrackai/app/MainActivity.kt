@@ -4,31 +4,29 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.jobtrackai.core.common.ui.UiState
-import com.jobtrackai.core.designsystem.component.UiStateContent
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.jobtrackai.app.navigation.JobTrackNavHost
+import com.jobtrackai.core.common.navigation.NavDestinations
+import com.jobtrackai.core.designsystem.component.JobTrackNavigationBar
 import com.jobtrackai.core.designsystem.theme.JobTrackTheme
 import com.jobtrackai.core.designsystem.theme.ThemeMode
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
 
 /**
  * Single-activity host for the whole app.
  *
- * Demonstrating Phase 2 architecture: UiState handling and brand theme.
+ * Hosting Phase 4 Navigation Skeleton.
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -37,52 +35,66 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             JobTrackTheme {
-                MainContent()
+                MainApp()
             }
         }
     }
 }
 
 @Composable
-private fun MainContent() {
-    // Simulate a data fetch lifecycle for demonstration
-    var uiState by remember { mutableStateOf<UiState<String>>(UiState.Loading) }
+private fun MainApp() {
+    val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
 
-    LaunchedEffect(Unit) {
-        delay(2000) // Show loading
-        uiState = UiState.Success("Welcome to JobTrack AI — Architecture Verified")
-    }
+    // Only show navigation bar for top-level MainGraph destinations
+    val showBottomBar = currentDestination?.hierarchy?.any {
+        it.hasRoute(NavDestinations.Home::class) ||
+            it.hasRoute(NavDestinations.Jobs::class) ||
+            it.hasRoute(NavDestinations.Applications::class) ||
+            it.hasRoute(NavDestinations.Interviews::class) ||
+            it.hasRoute(NavDestinations.Profile::class)
+    } == true
 
-    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            UiStateContent(
-                state = uiState,
-                onRetry = { /* Reset to loading */ }
-            ) { data ->
-                Text(text = data)
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        bottomBar = {
+            if (showBottomBar) {
+                JobTrackNavigationBar(
+                    currentDestination = currentDestination,
+                    onNavigateToDestination = { destination ->
+                        navController.navigate(destination) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
             }
         }
+    ) { innerPadding ->
+        JobTrackNavHost(
+            navController = navController,
+            modifier = Modifier.padding(innerPadding)
+        )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun MainContentPreview() {
+private fun MainAppPreview() {
     JobTrackTheme {
-        MainContent()
+        MainApp()
     }
 }
 
 @Preview(showBackground = true, name = "Dark theme")
 @Composable
-private fun MainContentDarkPreview() {
+private fun MainAppDarkPreview() {
     JobTrackTheme(themeMode = ThemeMode.Dark) {
-        MainContent()
+        MainApp()
     }
 }
 

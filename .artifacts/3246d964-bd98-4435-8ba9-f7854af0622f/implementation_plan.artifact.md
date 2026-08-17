@@ -1,35 +1,50 @@
-# Implementation Plan - Phase 2: Architecture Foundations
+# Implementation Plan - Phase 4: Navigation Skeleton
 
-Having completed the project analysis and verified the modular structure, we now establish the core architectural patterns that will be used throughout JobTrack AI. This phase focuses on creating the "plumbing" that ensures consistency, type safety, and production quality across all features.
+This phase sets up the app's navigation architecture using **Navigation Compose** with type-safe routes. We will implement the root `NavHost`, the Bottom Navigation bar, and connect the major feature modules.
 
-## Objective
-Establish standardized patterns for State Management (Rule 31), Error Handling (Rule 35), and Core Utilities.
+## User Review Required
+
+> [!IMPORTANT]
+> We will use **Kotlin Serialization** for type-safe navigation routes. This is the modern standard for Compose Navigation.
 
 ## Proposed Changes
 
 ### [core:common]
-Standardize how data flows from repositories to the UI.
+Shared navigation utilities.
 
-#### [NEW] [UiState.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/common/src/main/java/com/jobtrackai/core/common/ui/UiState.kt)
-A generic sealed interface representing the UI state as described in Section 31: `Loading`, `Success`, `Empty`, and `Error`.
-
-#### [NEW] [ResultExtensions.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/common/src/main/java/com/jobtrackai/core/common/result/ResultExtensions.kt)
-Utility functions to map `DomainResult<T>` directly to `UiState<T>` with minimal boilerplate.
-
-#### [NEW] [DateUtils.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/common/src/main/java/com/jobtrackai/core/common/util/DateUtils.kt)
-Core utilities for handling ISO 8601 strings and formatting dates for the UI (interviews, application dates).
+#### [NEW] [NavDestinations.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/common/src/main/java/com/jobtrackai/core/common/navigation/NavDestinations.kt)
+Define the sealed hierarchy for all app routes (Auth, Main, etc.).
 
 ### [core:designsystem]
-Extend the design system with architectural support for state.
+Navigation UI components.
 
-#### [NEW] [CommonUiState.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/designsystem/src/main/java/com/jobtrackai/core/designsystem/component/CommonUiState.kt)
-Composable wrappers (e.g., `UiStateContent`) that automatically handle Loading/Error/Empty states using the brand's design language (Rule 7).
+#### [NEW] [JobTrackNavigationBar.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/designsystem/src/main/java/com/jobtrackai/core/designsystem/component/JobTrackNavigationBar.kt)
+Reusable Bottom Navigation Bar using Material 3 `NavigationBar`.
+
+### [app]
+The navigation host and orchestration.
+
+#### [NEW] [JobTrackNavHost.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/app/src/main/java/com/jobtrackai/app/navigation/JobTrackNavHost.kt)
+The root `NavHost` that manages transitions between Auth, Onboarding, and the Main Dashboard.
+
+#### [MODIFY] [MainActivity.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/app/src/main/java/com/jobtrackai/app/MainActivity.kt)
+Update `MainActivity` to host the `JobTrackNavHost` and manage the `Scaffold` with Bottom Navigation.
+
+### [feature:*]
+Each feature module will get a placeholder `*Navigation.kt` file to define its own internal graph (following the "Now in Android" pattern).
+
+#### [NEW] [AuthNavigation.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/auth/src/main/java/com/jobtrackai/feature/auth/navigation/AuthNavigation.kt)
+#### [NEW] [HomeNavigation.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/analytics/src/main/java/com/jobtrackai/feature/analytics/navigation/HomeNavigation.kt)
+#### [NEW] [JobsNavigation.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/jobs/src/main/java/com/jobtrackai/feature/jobs/navigation/JobsNavigation.kt)
+#### [NEW] [ApplicationsNavigation.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/applications/src/main/java/com/jobtrackai/feature/applications/navigation/ApplicationsNavigation.kt)
+#### [NEW] [InterviewsNavigation.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/interviews/src/main/java/com/jobtrackai/feature/interviews/navigation/InterviewsNavigation.kt)
+#### [NEW] [ProfileNavigation.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/profile/src/main/java/com/jobtrackai/feature/profile/navigation/ProfileNavigation.kt)
 
 ## Verification Plan
 
 ### Automated Tests
-- Unit tests for `DateUtils` to ensure consistent formatting across Locales.
-- Unit tests for `DomainResult` to `UiState` mapping logic.
+- Navigation tests to ensure correct start destination and state changes on navigation.
 
 ### Manual Verification
-- Temporary update to `MainActivity` to demonstrate a `UiState.Loading` -> `UiState.Success` transition using the new base components.
+- Verify that clicking Bottom Navigation items correctly switches between feature placeholders.
+- Verify that the Back button behavior is correct (returning to Home or exiting app).
