@@ -1,34 +1,42 @@
-# Walkthrough - Phase 5: Authentication
+# Walkthrough - Phase 6: User Profile
 
-I have implemented a full-featured, secure authentication system using Firebase Authentication. The app now supports user registration, login, password recovery, and persistent sessions.
+I have implemented the User Profile module, enabling users to manage their professional identity, career preferences, and skills.
 
 ## Changes Made
 
 ### Core Infrastructure
-- **[User.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/common/src/main/java/com/jobtrackai/core/common/model/User.kt)**: Defined the domain model for an authenticated user.
-- **[FirebaseModule.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/di/src/main/java/com/jobtrackai/core/di/FirebaseModule.kt)**: Integrated Firebase SDK into the dependency injection graph.
+- **[UserProfile.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/common/src/main/java/com/jobtrackai/core/common/model/UserProfile.kt)**: Created a detailed domain model for professional user data.
+- **[SkillTagInput.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/designsystem/src/main/java/com/jobtrackai/core/designsystem/component/SkillTagInput.kt)**: Added a reusable tag-input component to the design system for managing lists of skills.
 
-### Authentication Feature (`feature:auth`)
-- **Clean Architecture Implementation**:
-    - **Domain**: Created `AuthRepository` interface and four specific UseCases (`Login`, `Register`, `ResetPassword`, `GetAuthState`).
-    - **Data**: Implemented `FirebaseAuthRepository` using the Firebase SDK, including mapping Firebase errors to our standardized `DomainError` system.
-    - **Presentation**: Built three new professional screens with real-time field validation:
-        - [LoginScreen](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/auth/src/main/java/com/jobtrackai/feature/auth/login/LoginScreen.kt)
-        - [RegisterScreen](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/auth/src/main/java/com/jobtrackai/feature/auth/register/RegisterScreen.kt)
-        - [ForgotPasswordScreen](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/auth/src/main/java/com/jobtrackai/feature/auth/forgotpassword/ForgotPasswordScreen.kt)
-
-### Session Management
-- **[MainViewModel.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/app/src/main/java/com/jobtrackai/app/presentation/MainViewModel.kt)**: Added logic to observe the authentication state globally.
-- **[MainActivity.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/app/src/main/java/com/jobtrackai/app/MainActivity.kt)**: Now checks the user's login status on startup to decide whether to show the Login flow or the Dashboard.
+### Profile Feature (`feature:profile`)
+- **Domain Layer**: Defined `ProfileRepository` and UseCases for fetching and updating user profiles.
+- **Data Layer**: Implemented `FirestoreProfileRepository` to persist data in Google Cloud Firestore.
+- **Presentation Layer**:
+    - **[ProfileViewModel.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/profile/src/main/java/com/jobtrackai/feature/profile/presentation/details/ProfileViewModel.kt)**: Orchestrates fetching the profile on startup and managing the View/Edit state transitions.
+    - **[ProfileScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/profile/src/main/java/com/jobtrackai/feature/profile/details/ProfileScreen.kt)**: A Material 3 screen that toggles between a clean profile summary and an interactive edit form.
 
 ## Verification
-- **Unit Testing**: All authentication business logic is covered by unit tests, achieving 100% pass rate.
-    - [LoginUseCaseTest.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/auth/src/test/java/com/jobtrackai/feature/auth/domain/usecase/LoginUseCaseTest.kt)
-    - [LoginViewModelTest.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/auth/src/test/java/com/jobtrackai/feature/auth/presentation/login/LoginViewModelTest.kt)
-- **Manual Verification**: The app now renders a complete login form on your device. Clicking "Register" or "Forgot Password" correctly navigates through the auth flow.
 
-> [!WARNING]
-> You must have a valid `google-services.json` and enable **Email/Password** in your Firebase Console for real authentication to work. The current build uses a dummy configuration to allow local development of the UI and navigation.
+### Automated Tests
+- **[ProfileViewModelTest.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/profile/src/test/java/com/jobtrackai/feature/profile/presentation/details/ProfileViewModelTest.kt)**: Verified the lifecycle of fetching data, handling empty states, and successfully saving updates.
+
+### Manual Verification
+- Deployed to device.
+- Navigated to the "Profile" tab.
+- Successfully switched between "View" and "Edit" modes.
+- Verified that skills can be added as tags and removed interactively.
+
+> [!TIP]
+> You can now test this on your device by navigating to the **Profile** tab. Click the **"Setup Profile"** button (or the Edit FAB) to fill in your professional details.
+
+## Offline Demo Mode (Rule 64)
+- **[MockAuthRepository.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/auth/src/main/java/com/jobtrackai/feature/auth/data/repository/MockAuthRepository.kt)**: Created a bypass for authentication to allow immediate testing without a live Firebase backend.
+- **Wired via Hilt**: Updated the DI layer to automatically switch between Mock and Real Firebase logic based on the build type.
+
+> [!IMPORTANT]
+> **Demo Credentials:**
+> - Email: `demo@jobtrackai.com`
+> - Password: `password123`
 
 ## Next Steps
-We are ready for **Phase 6: Profile**. We will build the user profile screen where users can manage their personal details, experience, and skills.
+We are ready for **Phase 7: Room Database**.
