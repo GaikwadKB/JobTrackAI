@@ -38,6 +38,7 @@ import com.jobtrackai.feature.jobs.domain.model.Job
 fun JobDetailsRoute(
     jobId: String,
     onBackClick: () -> Unit,
+    onApplyClick: (Job) -> Unit,
     viewModel: JobDetailsViewModel = hiltViewModel()
 ) {
     val jobState by viewModel.jobState.collectAsStateWithLifecycle()
@@ -71,14 +72,20 @@ fun JobDetailsRoute(
     ) { padding ->
         Box(modifier = Modifier.padding(padding)) {
             UiStateContent(state = jobState) { job ->
-                JobDetailsContent(job = job)
+                JobDetailsContent(
+                    job = job,
+                    onApplyClick = { onApplyClick(job) }
+                )
             }
         }
     }
 }
 
 @Composable
-internal fun JobDetailsContent(job: Job) {
+internal fun JobDetailsContent(
+    job: Job,
+    onApplyClick: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -104,7 +111,7 @@ internal fun JobDetailsContent(job: Job) {
         Spacer(modifier = Modifier.height(32.dp))
         
         Button(
-            onClick = { /* Apply logic will be in Phase 9 */ },
+            onClick = onApplyClick,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "Apply Now")

@@ -54,7 +54,7 @@ class JobRepositoryImpl @Inject constructor(
 }
 
 // Mappers
-internal fun JobEntity.toDomain(): Job = Job(
+fun JobEntity.toDomain(): Job = Job(
     id = id,
     title = title,
     companyName = companyName,
@@ -77,7 +77,7 @@ internal fun JobEntity.toDomain(): Job = Job(
     isApplied = isApplied
 )
 
-internal fun Job.toEntity(): JobEntity = JobEntity(
+fun Job.toEntity(): JobEntity = JobEntity(
     id = id,
     title = title,
     companyName = companyName,

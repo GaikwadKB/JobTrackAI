@@ -6,6 +6,7 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.jobtrackai.core.common.navigation.NavDestinations
+import com.jobtrackai.feature.jobs.domain.model.Job
 import com.jobtrackai.feature.jobs.presentation.details.JobDetailsRoute
 import com.jobtrackai.feature.jobs.search.JobSearchRoute
 
@@ -19,7 +20,8 @@ fun NavController.navigateToJobDetails(jobId: String, navOptions: NavOptions? = 
 
 fun NavGraphBuilder.jobsScreen(
     onJobClick: (String) -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onApplyClick: (Job) -> Unit
 ) {
     composable<NavDestinations.Jobs> {
         JobSearchRoute(onJobClick = onJobClick)
@@ -29,7 +31,8 @@ fun NavGraphBuilder.jobsScreen(
         val details = backStackEntry.toRoute<NavDestinations.JobDetails>()
         JobDetailsRoute(
             jobId = details.jobId,
-            onBackClick = onBackClick
+            onBackClick = onBackClick,
+            onApplyClick = onApplyClick
         )
     }
 }

@@ -1,56 +1,59 @@
-# Implementation Plan - Phase 8: Job Management
+# Implementation Plan - Phase 9: Application Tracker
 
-This phase implements the job search and saving functionality. Users will be able to search for jobs with filters, view job details, and save jobs to their profile for later application.
+This phase implements the job application tracking system, featuring a Kanban-style board to visualize and manage the 10 stages of a job search (from SAVED to OFFER/REJECTED).
 
 ## Objective
-Build a production-quality job search experience with debounced searching, pagination, and offline-first saving.
+Build a professional application management system that allows users to track their progress, update stages, and manage recruiter details.
 
 ## Proposed Changes
 
-### [feature:jobs] - Domain Layer
-#### [NEW] [Job.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/jobs/src/main/java/com/jobtrackai/feature/jobs/domain/model/Job.kt)
-Domain model for a job listing with all fields from Section 7.
+### [feature:applications] - Domain Layer
+#### [NEW] [Application.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/applications/src/main/java/com/jobtrackai/feature/applications/domain/model/Application.kt)
+Domain model for a job application, including the associated `Job` details.
 
-#### [NEW] [JobRepository.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/jobs/src/main/java/com/jobtrackai/feature/jobs/domain/repository/JobRepository.kt)
+#### [NEW] [ApplicationRepository.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/applications/src/main/java/com/jobtrackai/feature/applications/domain/repository/ApplicationRepository.kt)
 Interface for:
-- `searchJobs(query, filters, page)`: Remote search.
-- `getSavedJobs()`: Local observation.
-- `toggleSaveJob(job)`: Persistence toggle.
+- `applyToJob(jobId, userId)`: Initialize a new application.
+- `getApplications(userId)`: Observe all applications for a user.
+- `updateApplicationStage(applicationId, newStage)`: Move an application in the Kanban flow.
+- `updateApplicationDetails(application)`: Update notes, recruiter info, etc.
 
 #### [NEW] UseCases
-- `SearchJobsUseCase`
-- `GetSavedJobsUseCase`
-- `ToggleSaveJobUseCase`
+- `ApplyToJobUseCase`
+- `GetApplicationsUseCase`
+- `UpdateApplicationStageUseCase`
 
-### [feature:jobs] - Data Layer
-#### [NEW] [JobRepositoryImpl.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/jobs/src/main/java/com/jobtrackai/feature/jobs/data/repository/JobRepositoryImpl.kt)
-Implementation using `JobDao` (local) and a mock/real API client (remote).
+### [feature:applications] - Data Layer
+#### [NEW] [ApplicationRepositoryImpl.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/applications/src/main/java/com/jobtrackai/feature/applications/data/repository/ApplicationRepositoryImpl.kt)
+Implementation using `ApplicationDao` and `JobDao` to fetch related job data.
 
-#### [NEW] [MockJobApi.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/jobs/src/main/java/com/jobtrackai/feature/jobs/data/remote/MockJobApi.kt)
-Simulated remote API for testing and demo mode (Rule 64).
+### [feature:applications] - Presentation Layer
+#### [NEW] [ApplicationTrackerViewModel.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/applications/src/main/java/com/jobtrackai/feature/applications/presentation/tracker/ApplicationTrackerViewModel.kt)
+Orchestrates the Kanban board state, grouping applications by their `ApplicationStage`.
 
-### [feature:jobs] - Presentation Layer
-#### [NEW] [JobSearchViewModel.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/jobs/src/main/java/com/jobtrackai/feature/jobs/presentation/search/JobSearchViewModel.kt)
-Manages search state, query debouncing (Rule 42), and pagination (Rule 41).
+#### [MODIFY] [ApplicationsScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/applications/src/main/java/com/jobtrackai/feature/applications/tracker/ApplicationsScreen.kt)
+Implement a horizontally scrollable Kanban board using `LazyRow` and `LazyColumn`.
 
-#### [MODIFY] [JobSearchScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/jobs/src/main/java/com/jobtrackai/feature/jobs/search/JobSearchScreen.kt)
-Implement the search UI using Material 3 `SearchBar` (or custom equivalent), `LazyColumn` for results, and Filter chips.
+#### [NEW] [ApplicationDetailsScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/applications/src/main/java/com/jobtrackai/feature/applications/presentation/details/ApplicationDetailsScreen.kt)
+Detailed view for an application with editable notes and recruiter contact info.
 
-#### [NEW] [JobDetailsScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/jobs/src/main/java/com/jobtrackai/feature/jobs/presentation/details/JobDetailsScreen.kt)
-Full job description and "Apply/Save" actions.
+### [feature:jobs] - Integration
+#### [MODIFY] [JobDetailsScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/jobs/src/main/java/com/jobtrackai/feature/jobs/presentation/details/JobDetailsScreen.kt)
+Wire the "Apply Now" button to the `ApplyToJobUseCase`.
 
 ## User Review Required
 
-> [!TIP]
-> We will implement **Debounced Search** (Rule 42) so that API calls are only made 500ms after the user stops typing, saving bandwidth and battery.
+> [!NOTE]
+> **Kanban Board:** The UI will feature 10 columns (one per stage). On smaller screens, this will be a horizontally scrollable view where each column shows a list of application cards.
 
 ## Verification Plan
 
 ### Automated Tests
-- Unit tests for `JobSearchViewModel` to verify debounce and pagination logic.
-- Mapper tests (API DTO -> Domain -> Entity).
+- Unit tests for `ApplicationTrackerViewModel` to verify grouping logic.
+- Integration tests for `ApplicationRepositoryImpl` with Room.
 
 ### Manual Verification
-- Type in the search bar and verify results update after a short delay.
-- Scroll to the bottom of the list and verify "Load More" behavior.
-- Click the "Save" icon on a job and verify it appears in the (future) Saved Jobs screen or toggles state correctly.
+- Apply to a job from the Jobs tab.
+- Verify the new application appears in the "APPLIED" column of the tracker.
+- Change the stage of an application and verify it moves to the correct column.
+- Edit application notes and verify persistence.
