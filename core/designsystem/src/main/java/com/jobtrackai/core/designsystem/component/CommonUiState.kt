@@ -28,18 +28,21 @@ import com.jobtrackai.core.common.result.DomainError
 @Composable
 fun <T> UiStateContent(
     state: UiState<T>,
+    modifier: Modifier = Modifier,
     onRetry: () -> Unit = {},
     emptyContent: @Composable () -> Unit = { DefaultEmptyContent() },
     errorContent: @Composable (DomainError) -> Unit = { DefaultErrorContent(it, onRetry) },
     loadingContent: @Composable () -> Unit = { DefaultLoadingContent() },
     content: @Composable (T) -> Unit
 ) {
-    when (state) {
-        is UiState.Idle -> Unit
-        is UiState.Loading -> loadingContent()
-        is UiState.Success -> content(state.data)
-        is UiState.Empty -> emptyContent()
-        is UiState.Error -> errorContent(state.error)
+    Box(modifier = modifier) {
+        when (state) {
+            is UiState.Idle -> Unit
+            is UiState.Loading -> loadingContent()
+            is UiState.Success -> content(state.data)
+            is UiState.Empty -> emptyContent()
+            is UiState.Error -> errorContent(state.error)
+        }
     }
 }
 
