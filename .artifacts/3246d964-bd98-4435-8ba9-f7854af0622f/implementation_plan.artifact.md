@@ -1,52 +1,56 @@
-# Implementation Plan - Phase 7: Room Database (Local Source of Truth)
+# Implementation Plan - Phase 8: Job Management
 
-This phase establishes the **Offline-first Architecture (Rule 24)** by implementing the local database schema. We will create entities for all major features to provide a unified source of truth that remains available without an internet connection.
+This phase implements the job search and saving functionality. Users will be able to search for jobs with filters, view job details, and save jobs to their profile for later application.
 
 ## Objective
-Implement Room entities, DAOs, and database configuration for Jobs, Applications, Interviews, and Profiles.
+Build a production-quality job search experience with debounced searching, pagination, and offline-first saving.
 
 ## Proposed Changes
 
-### [core:common]
-Shared enums for database consistency.
+### [feature:jobs] - Domain Layer
+#### [NEW] [Job.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/jobs/src/main/java/com/jobtrackai/feature/jobs/domain/model/Job.kt)
+Domain model for a job listing with all fields from Section 7.
 
-#### [NEW] [ApplicationStage.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/common/src/main/java/com/jobtrackai/core/common/model/ApplicationStage.kt)
-Define the 10 stages as per Section 9 (SAVED, APPLIED, SCREENING, etc.).
+#### [NEW] [JobRepository.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/jobs/src/main/java/com/jobtrackai/feature/jobs/domain/repository/JobRepository.kt)
+Interface for:
+- `searchJobs(query, filters, page)`: Remote search.
+- `getSavedJobs()`: Local observation.
+- `toggleSaveJob(job)`: Persistence toggle.
 
-### [core:database]
-The heart of the local persistence layer.
+#### [NEW] UseCases
+- `SearchJobsUseCase`
+- `GetSavedJobsUseCase`
+- `ToggleSaveJobUseCase`
 
-#### [NEW] Entities
-- `ProfileEntity`: Cache for the user's professional data.
-- `JobEntity`: Detailed job postings.
-- `ApplicationEntity`: Tracking records with foreign keys to `JobEntity`.
-- `InterviewEntity`: Scheduling data with foreign keys to `ApplicationEntity`.
-- `SyncQueueEntity`: Tracks local changes that need to be uploaded to Firebase (Rule 25).
+### [feature:jobs] - Data Layer
+#### [NEW] [JobRepositoryImpl.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/jobs/src/main/java/com/jobtrackai/feature/jobs/data/repository/JobRepositoryImpl.kt)
+Implementation using `JobDao` (local) and a mock/real API client (remote).
 
-#### [NEW] DAOs
-- `ProfileDao`, `JobDao`, `ApplicationDao`, `InterviewDao`, `SyncDao`.
+#### [NEW] [MockJobApi.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/jobs/src/main/java/com/jobtrackai/feature/jobs/data/remote/MockJobApi.kt)
+Simulated remote API for testing and demo mode (Rule 64).
 
-#### [MODIFY] [AppDatabase.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/database/src/main/java/com/jobtrackai/core/database/AppDatabase.kt)
-Register all entities and DAOs. Version bump to `2`.
+### [feature:jobs] - Presentation Layer
+#### [NEW] [JobSearchViewModel.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/jobs/src/main/java/com/jobtrackai/feature/jobs/presentation/search/JobSearchViewModel.kt)
+Manages search state, query debouncing (Rule 42), and pagination (Rule 41).
 
-### [core:di]
-Exposing DAOs to the dependency graph.
+#### [MODIFY] [JobSearchScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/jobs/src/main/java/com/jobtrackai/feature/jobs/search/JobSearchScreen.kt)
+Implement the search UI using Material 3 `SearchBar` (or custom equivalent), `LazyColumn` for results, and Filter chips.
 
-#### [NEW] [DatabaseModule.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/di/src/main/java/com/jobtrackai/core/di/DatabaseModule.kt)
-Provide `AppDatabase` and individual DAOs for injection into Repositories.
+#### [NEW] [JobDetailsScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/jobs/src/main/java/com/jobtrackai/feature/jobs/presentation/details/JobDetailsScreen.kt)
+Full job description and "Apply/Save" actions.
 
 ## User Review Required
 
-> [!IMPORTANT]
-> **Data Integrity:** We will use `ForeignKey` constraints to ensure that an `Interview` cannot exist without a valid `Application`, and an `Application` cannot exist without a `Job`.
+> [!TIP]
+> We will implement **Debounced Search** (Rule 42) so that API calls are only made 500ms after the user stops typing, saving bandwidth and battery.
 
 ## Verification Plan
 
 ### Automated Tests
-- Room Migration tests (Migration from v1 to v2).
-- DAO unit tests: Verify `Insert`, `Update`, and `Upsert` logic for all entities.
-- Foreign Key constraint tests: Ensure data consistency is enforced at the database level.
+- Unit tests for `JobSearchViewModel` to verify debounce and pagination logic.
+- Mapper tests (API DTO -> Domain -> Entity).
 
 ### Manual Verification
-- Use **App Inspection** in Android Studio to verify tables are created correctly on the device.
-- Perform local CRUD operations on the physical device and verify persistence across app restarts.
+- Type in the search bar and verify results update after a short delay.
+- Scroll to the bottom of the list and verify "Load More" behavior.
+- Click the "Save" icon on a job and verify it appears in the (future) Saved Jobs screen or toggles state correctly.

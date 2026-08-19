@@ -1,18 +1,17 @@
-# Tasks - Phase 7: Room Database
+# Tasks - Phase 8: Job Management
 
-- `[x]` Define `ApplicationStage` enum in `core:common`
-- `[x]` Implement Room Entities in `core:database`
-    - `[x]` `ProfileEntity`
-    - `[x]` `JobEntity`
-    - `[x]` `ApplicationEntity`
-    - `[x]` `InterviewEntity`
-    - `[x]` `SyncQueueEntity`
-- `[x]` Implement Room DAOs in `core:database`
-    - `[x]` `ProfileDao`
-    - `[x]` `JobDao`
-    - `[x]` `ApplicationDao`
-    - `[x]` `InterviewDao`
-    - `[x]` `SyncDao`
-- `[x]` Update `AppDatabase` and bump version
-- `[x]` Implement `DatabaseModule` in `core:di`
-- `[x]` Verify with unit tests and Room schema export
+- `[x]` Define `Job` domain model in `feature:jobs`
+- `[x]` Define `JobRepository` interface in `feature:jobs` (Domain)
+- `[x]` Implement `JobUseCases` in `feature:jobs` (Domain)
+    - `[x]` `SearchJobsUseCase`
+    - `[x]` `GetSavedJobsUseCase`
+    - `[x]` `ToggleSaveJobUseCase`
+- `[x]` Implement `MockJobApi` in `feature:jobs` (Data)
+- `[x]` Implement `JobRepositoryImpl` in `feature:jobs` (Data)
+- `[x]` Setup Hilt for `feature:jobs`
+- `[x]` Implement `JobSearchViewModel` with debouncing and pagination
+- `[x]` Implement `JobSearchScreen` UI
+- `[x]` Implement `JobDetailsScreen` UI
+- `[x]` Update `JobsNavigation` routes
+- `[x]` Unit tests for Job search and saving logic
+- `[x]` Verify with manual testing on device
