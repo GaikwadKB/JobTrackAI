@@ -1,42 +1,32 @@
-# Walkthrough - Phase 6: User Profile
+# Walkthrough - Phase 7: Room Database
 
-I have implemented the User Profile module, enabling users to manage their professional identity, career preferences, and skills.
+I have established the local database schema for JobTrack AI, providing a robust, offline-first source of truth for all user data.
 
 ## Changes Made
 
-### Core Infrastructure
-- **[UserProfile.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/common/src/main/java/com/jobtrackai/core/common/model/UserProfile.kt)**: Created a detailed domain model for professional user data.
-- **[SkillTagInput.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/designsystem/src/main/java/com/jobtrackai/core/designsystem/component/SkillTagInput.kt)**: Added a reusable tag-input component to the design system for managing lists of skills.
+### Core Infrastructure (`core:common`)
+- **[ApplicationStage.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/common/src/main/java/com/jobtrackai/core/common/model/ApplicationStage.kt)**: Defined the 10 stages of a job application to ensure consistency across the database and UI.
 
-### Profile Feature (`feature:profile`)
-- **Domain Layer**: Defined `ProfileRepository` and UseCases for fetching and updating user profiles.
-- **Data Layer**: Implemented `FirestoreProfileRepository` to persist data in Google Cloud Firestore.
-- **Presentation Layer**:
-    - **[ProfileViewModel.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/profile/src/main/java/com/jobtrackai/feature/profile/presentation/details/ProfileViewModel.kt)**: Orchestrates fetching the profile on startup and managing the View/Edit state transitions.
-    - **[ProfileScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/profile/src/main/java/com/jobtrackai/feature/profile/details/ProfileScreen.kt)**: A Material 3 screen that toggles between a clean profile summary and an interactive edit form.
+### Database Layer (`core:database`)
+- **Standardized Entities**: Created Room entities for all core features:
+    - `ProfileEntity`: For professional user data.
+    - `JobEntity`: For storing job details.
+    - `ApplicationEntity`: For tracking application progress (linked to Jobs).
+    - `InterviewEntity`: For scheduling (linked to Applications).
+    - `SyncQueueEntity`: For managing offline synchronization.
+- **Relational Integrity**: Implemented `ForeignKey` constraints with cascading deletes to ensure data consistency.
+- **Type Safety**: Updated `Converters.kt` to handle modern types like `Instant`, `List<String>`, and custom Enums.
+- **DAO Implementation**: Built DAOs with modern `Flow` support for real-time UI updates.
+
+### Dependency Injection (`core:di`)
+- **[DatabaseModule.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/di/src/main/java/com/jobtrackai/core/di/DatabaseModule.kt)**: Wired the database and all individual DAOs into the Hilt graph.
 
 ## Verification
+- **Room Schema Export**: Successfully exported `2.json` schema, verifying that KSP correctly processed all entities, relationships, and converters.
+- **Build**: Verified project compilation after adding Room and DAO dependencies.
 
-### Automated Tests
-- **[ProfileViewModelTest.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/profile/src/test/java/com/jobtrackai/feature/profile/presentation/details/ProfileViewModelTest.kt)**: Verified the lifecycle of fetching data, handling empty states, and successfully saving updates.
-
-### Manual Verification
-- Deployed to device.
-- Navigated to the "Profile" tab.
-- Successfully switched between "View" and "Edit" modes.
-- Verified that skills can be added as tags and removed interactively.
-
-> [!TIP]
-> You can now test this on your device by navigating to the **Profile** tab. Click the **"Setup Profile"** button (or the Edit FAB) to fill in your professional details.
-
-## Offline Demo Mode (Rule 64)
-- **[MockAuthRepository.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/auth/src/main/java/com/jobtrackai/feature/auth/data/repository/MockAuthRepository.kt)**: Created a bypass for authentication to allow immediate testing without a live Firebase backend.
-- **Wired via Hilt**: Updated the DI layer to automatically switch between Mock and Real Firebase logic based on the build type.
-
-> [!IMPORTANT]
-> **Demo Credentials:**
-> - Email: `demo@jobtrackai.com`
-> - Password: `password123`
+> [!NOTE]
+> The database is now ready to support fully offline workflows. In the next phases, we will start filling these tables with real data from the Job and Application modules.
 
 ## Next Steps
-We are ready for **Phase 7: Room Database**.
+We are now ready for **Phase 8: Job Management**. We will implement the job search and saving functionality, using the `JobDao` we just created.
