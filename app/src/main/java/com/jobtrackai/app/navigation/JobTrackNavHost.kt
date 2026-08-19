@@ -10,6 +10,7 @@ import com.jobtrackai.feature.applications.navigation.applicationsScreen
 import com.jobtrackai.feature.auth.navigation.authGraph
 import com.jobtrackai.feature.interviews.navigation.interviewsScreen
 import com.jobtrackai.feature.jobs.navigation.jobsScreen
+import com.jobtrackai.feature.jobs.navigation.navigateToJobDetails
 import com.jobtrackai.feature.profile.navigation.profileScreen
 
 /**
@@ -39,7 +40,10 @@ fun JobTrackNavHost(
         )
         
         homeScreen()
-        jobsScreen()
+        jobsScreen(
+            onJobClick = { jobId -> navController.navigateToJobDetails(jobId) },
+            onBackClick = { navController.popBackStack() }
+        )
         applicationsScreen()
         interviewsScreen()
         profileScreen()
