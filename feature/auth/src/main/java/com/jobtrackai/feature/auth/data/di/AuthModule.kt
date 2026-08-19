@@ -1,9 +1,11 @@
 package com.jobtrackai.feature.auth.data.di
 
+import com.jobtrackai.feature.auth.BuildConfig
 import com.jobtrackai.feature.auth.data.repository.FirebaseAuthRepository
+import com.jobtrackai.feature.auth.data.repository.MockAuthRepository
 import com.jobtrackai.feature.auth.domain.repository.AuthRepository
-import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
@@ -13,11 +15,18 @@ import javax.inject.Singleton
  */
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class AuthModule {
+object AuthModule {
 
-    @Binds
+    @Provides
     @Singleton
-    abstract fun bindAuthRepository(
-        impl: FirebaseAuthRepository
-    ): AuthRepository
+    fun provideAuthRepository(
+        firebaseImpl: FirebaseAuthRepository,
+        mockImpl: MockAuthRepository
+    ): AuthRepository {
+        return if (BuildConfig.DEBUG) {
+            mockImpl
+        } else {
+            firebaseImpl
+        }
+    }
 }
