@@ -1,17 +1,17 @@
-# Tasks - Phase 9: Application Tracker
+# Tasks - Phase 10: Interview Management
 
-- `[x]` Define `Application` domain model in `feature:applications`
-- `[x]` Define `ApplicationRepository` interface in `feature:applications` (Domain)
-- `[x]` Implement `ApplicationUseCases` in `feature:applications` (Domain)
-    - `[x]` `ApplyToJobUseCase`
-    - `[x]` `GetApplicationsUseCase`
-    - `[x]` `UpdateApplicationStageUseCase`
-- `[x]` Implement `ApplicationRepositoryImpl` in `feature:applications` (Data)
-- `[x]` Setup Hilt for `feature:applications`
-- `[x]` Implement `ApplicationTrackerViewModel` with Kanban grouping
-- `[x]` Implement `ApplicationsScreen` (Kanban UI)
-- `[x]` Implement `ApplicationDetailsScreen` UI
-- `[x]` Wire "Apply Now" button in `JobDetailsScreen`
-- `[x]` Update navigation routes
-- `[x]` Unit tests for Kanban logic
-- `[x]` Verify with manual testing on device
+- `[ ]` Update `NavDestinations` in `core:common`
+- `[ ]` Define `Interview` domain model in `feature:interviews`
+- `[ ]` Define `InterviewRepository` interface in `feature:interviews` (Domain)
+- `[ ]` Implement `InterviewUseCases` in `feature:interviews` (Domain)
+    - `[ ]` `GetInterviewsUseCase`
+    - `[ ]` `ScheduleInterviewUseCase`
+- `[ ]` Implement `InterviewRepositoryImpl` in `feature:interviews` (Data)
+- `[ ]` Setup Hilt for `feature:interviews`
+- `[ ]` Implement `InterviewListViewModel`
+- `[ ]` Implement `InterviewsScreen` (List UI)
+- `[ ]` Implement `AddInterviewViewModel` and `AddInterviewScreen`
+- `[ ]` Wire "Schedule Interview" button in `ApplicationDetailsScreen`
+- `[ ]` Update navigation routes in `InterviewsNavigation` and `JobTrackNavHost`
+- `[ ]` Unit tests for Interview logic
+- `[ ]` Verify with manual testing on device

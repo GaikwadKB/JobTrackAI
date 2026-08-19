@@ -1,59 +1,61 @@
-# Implementation Plan - Phase 9: Application Tracker
+# Implementation Plan - Phase 10: Interview Management
 
-This phase implements the job application tracking system, featuring a Kanban-style board to visualize and manage the 10 stages of a job search (from SAVED to OFFER/REJECTED).
+This phase implements the interview scheduling and management system. Users will be able to track upcoming interviews, set dates and times, and manage meeting links for their active job applications.
 
 ## Objective
-Build a professional application management system that allows users to track their progress, update stages, and manage recruiter details.
+Build a comprehensive interview tracker that helps users stay organized during their job search.
 
 ## Proposed Changes
 
-### [feature:applications] - Domain Layer
-#### [NEW] [Application.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/applications/src/main/java/com/jobtrackai/feature/applications/domain/model/Application.kt)
-Domain model for a job application, including the associated `Job` details.
+### [core:common]
+#### [MODIFY] [NavDestinations.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/common/src/main/java/com/jobtrackai/core/common/navigation/NavDestinations.kt)
+Add `AddInterview(val applicationId: String)` to the sealed interface.
 
-#### [NEW] [ApplicationRepository.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/applications/src/main/java/com/jobtrackai/feature/applications/domain/repository/ApplicationRepository.kt)
+### [feature:interviews] - Domain Layer
+#### [NEW] [Interview.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/interviews/src/main/java/com/jobtrackai/feature/interviews/domain/model/Interview.kt)
+Domain model for an interview. It will include references to the associated `Job` and `Application` details (title, company) for display in the list.
+
+#### [NEW] [InterviewRepository.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/interviews/src/main/java/com/jobtrackai/feature/interviews/domain/repository/InterviewRepository.kt)
 Interface for:
-- `applyToJob(jobId, userId)`: Initialize a new application.
-- `getApplications(userId)`: Observe all applications for a user.
-- `updateApplicationStage(applicationId, newStage)`: Move an application in the Kanban flow.
-- `updateApplicationDetails(application)`: Update notes, recruiter info, etc.
+- `getInterviews(userId)`: Observe all upcoming interviews.
+- `scheduleInterview(interview)`: Save a new interview record.
+- `deleteInterview(interviewId)`: Remove or soft-delete an interview.
 
 #### [NEW] UseCases
-- `ApplyToJobUseCase`
-- `GetApplicationsUseCase`
-- `UpdateApplicationStageUseCase`
+- `GetInterviewsUseCase`
+- `ScheduleInterviewUseCase`
 
-### [feature:applications] - Data Layer
-#### [NEW] [ApplicationRepositoryImpl.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/applications/src/main/java/com/jobtrackai/feature/applications/data/repository/ApplicationRepositoryImpl.kt)
-Implementation using `ApplicationDao` and `JobDao` to fetch related job data.
+### [feature:interviews] - Data Layer
+#### [NEW] [InterviewRepositoryImpl.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/interviews/src/main/java/com/jobtrackai/feature/interviews/data/repository/InterviewRepositoryImpl.kt)
+Implementation using `InterviewDao`, `ApplicationDao`, and `JobDao` to build the complete `Interview` domain model.
 
-### [feature:applications] - Presentation Layer
-#### [NEW] [ApplicationTrackerViewModel.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/applications/src/main/java/com/jobtrackai/feature/applications/presentation/tracker/ApplicationTrackerViewModel.kt)
-Orchestrates the Kanban board state, grouping applications by their `ApplicationStage`.
+### [feature:interviews] - Presentation Layer
+#### [NEW] [InterviewListViewModel.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/interviews/src/main/java/com/jobtrackai/feature/interviews/presentation/list/InterviewListViewModel.kt)
+Manages the list of upcoming interviews, sorted by date.
 
-#### [MODIFY] [ApplicationsScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/applications/src/main/java/com/jobtrackai/feature/applications/tracker/ApplicationsScreen.kt)
-Implement a horizontally scrollable Kanban board using `LazyRow` and `LazyColumn`.
+#### [MODIFY] [InterviewsScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/interviews/src/main/java/com/jobtrackai/feature/interviews/list/InterviewsScreen.kt)
+Implement a list view showing interview cards with type, company, and time.
 
-#### [NEW] [ApplicationDetailsScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/applications/src/main/java/com/jobtrackai/feature/applications/presentation/details/ApplicationDetailsScreen.kt)
-Detailed view for an application with editable notes and recruiter contact info.
+#### [NEW] [AddInterviewScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/interviews/src/main/java/com/jobtrackai/feature/interviews/presentation/add/AddInterviewScreen.kt)
+Form to input interview details (Type, Date, Time, Link, Interviewer).
 
-### [feature:jobs] - Integration
-#### [MODIFY] [JobDetailsScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/jobs/src/main/java/com/jobtrackai/feature/jobs/presentation/details/JobDetailsScreen.kt)
-Wire the "Apply Now" button to the `ApplyToJobUseCase`.
+### [feature:applications] - Integration
+#### [MODIFY] [ApplicationDetailsScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/applications/src/main/java/com/jobtrackai/feature/applications/presentation/details/ApplicationDetailsScreen.kt)
+Add a "Schedule Interview" button that navigates to the `AddInterview` screen.
 
 ## User Review Required
 
-> [!NOTE]
-> **Kanban Board:** The UI will feature 10 columns (one per stage). On smaller screens, this will be a horizontally scrollable view where each column shows a list of application cards.
+> [!IMPORTANT]
+> **Date & Time Picking:** We will use Material 3 `DatePicker` and `TimePicker` for a professional scheduling experience.
 
 ## Verification Plan
 
 ### Automated Tests
-- Unit tests for `ApplicationTrackerViewModel` to verify grouping logic.
-- Integration tests for `ApplicationRepositoryImpl` with Room.
+- Unit tests for `InterviewListViewModel` to verify sorting and filtering.
+- Integration tests for `InterviewRepositoryImpl` to verify joined data fetching.
 
 ### Manual Verification
-- Apply to a job from the Jobs tab.
-- Verify the new application appears in the "APPLIED" column of the tracker.
-- Change the stage of an application and verify it moves to the correct column.
-- Edit application notes and verify persistence.
+- Navigate to an active application and click "Schedule Interview".
+- Fill in the details and save.
+- Verify the interview appears in the main **Interviews** tab.
+- Click a meeting link in the interview details and verify it opens correctly.
