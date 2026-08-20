@@ -19,7 +19,8 @@ fun NavController.navigateToApplicationDetails(applicationId: String, navOptions
 
 fun NavGraphBuilder.applicationsScreen(
     onApplicationClick: (String) -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onScheduleInterviewClick: (String) -> Unit
 ) {
     composable<NavDestinations.Applications> {
         ApplicationsRoute(onApplicationClick = onApplicationClick)
@@ -29,7 +30,8 @@ fun NavGraphBuilder.applicationsScreen(
         val details = backStackEntry.toRoute<NavDestinations.ApplicationDetails>()
         ApplicationDetailsRoute(
             applicationId = details.applicationId,
-            onBackClick = onBackClick
+            onBackClick = onBackClick,
+            onScheduleInterviewClick = onScheduleInterviewClick
         )
     }
 }

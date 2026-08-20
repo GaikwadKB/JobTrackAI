@@ -56,4 +56,7 @@ sealed interface NavDestinations {
 
     @Serializable
     data class InterviewDetails(val interviewId: String) : NavDestinations
+
+    @Serializable
+    data class AddInterview(val applicationId: String) : NavDestinations
 }
