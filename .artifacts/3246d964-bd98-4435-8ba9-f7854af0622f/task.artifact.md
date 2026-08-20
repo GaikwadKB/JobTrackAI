@@ -1,17 +1,11 @@
-# Tasks - Phase 10: Interview Management
+# Tasks - Phase 11: Notifications & Interview Reminders
 
-- `[x]` Update `NavDestinations` in `core:common`
-- `[x]` Define `Interview` domain model in `feature:interviews`
-- `[x]` Define `InterviewRepository` interface in `feature:interviews` (Domain)
-- `[x]` Implement `InterviewUseCases` in `feature:interviews` (Domain)
-    - `[x]` `GetInterviewsUseCase`
-    - `[x]` `ScheduleInterviewUseCase`
-- `[x]` Implement `InterviewRepositoryImpl` in `feature:interviews` (Data)
-- `[x]` Setup Hilt for `feature:interviews`
-- `[x]` Implement `InterviewListViewModel`
-- `[x]` Implement `InterviewsScreen` (List UI)
-- `[x]` Implement `AddInterviewViewModel` and `AddInterviewScreen`
-- `[x]` Wire "Schedule Interview" button in `ApplicationDetailsScreen`
-- `[x]` Update navigation routes in `InterviewsNavigation` and `JobTrackNavHost`
-- `[x]` Unit tests for Interview logic
-- `[x]` Verify with manual testing on device
+- `[x]` Implement `JobTrackNotificationManager` in `core:notifications`
+- `[x]` Define notification channels in `core:notifications`
+- `[x]` Implement `InterviewScheduler` in `feature:interviews`
+- `[x]` Implement `InterviewReminderWorker` in `feature:interviews`
+- `[x]` Wire `InterviewScheduler` into `InterviewRepositoryImpl`
+- `[x]` Initialize notification channels in `JobTrackApplication`
+- `[x]` Implement runtime notification permission request in `AddInterviewScreen`
+- `[x]` Unit tests for `InterviewScheduler` logic
+- `[x]` Verify with manual testing (simulated notifications)
