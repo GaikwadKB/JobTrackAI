@@ -1,61 +1,54 @@
-# Implementation Plan - Phase 10: Interview Management
+# Implementation Plan - Phase 11: Notifications & Interview Reminders
 
-This phase implements the interview scheduling and management system. Users will be able to track upcoming interviews, set dates and times, and manage meeting links for their active job applications.
+This phase implements automated interview reminders using **WorkManager**. Users will receive notifications at specific intervals before their scheduled interviews, ensuring they never miss a round.
 
 ## Objective
-Build a comprehensive interview tracker that helps users stay organized during their job search.
+Build a background notification system that enqueues reminders for scheduled interviews.
 
 ## Proposed Changes
 
-### [core:common]
-#### [MODIFY] [NavDestinations.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/common/src/main/java/com/jobtrackai/core/common/navigation/NavDestinations.kt)
-Add `AddInterview(val applicationId: String)` to the sealed interface.
+### [core:notifications]
+The core infrastructure for displaying notifications.
 
-### [feature:interviews] - Domain Layer
-#### [NEW] [Interview.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/interviews/src/main/java/com/jobtrackai/feature/interviews/domain/model/Interview.kt)
-Domain model for an interview. It will include references to the associated `Job` and `Application` details (title, company) for display in the list.
+#### [NEW] [JobTrackNotificationManager.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/notifications/src/main/java/com/jobtrackai/core/notifications/JobTrackNotificationManager.kt)
+Interface and implementation to:
+- Create notification channels (Interview Reminders).
+- Show notifications with consistent branding.
+- Handle notification permissions (POST_NOTIFICATIONS for API 33+).
 
-#### [NEW] [InterviewRepository.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/interviews/src/main/java/com/jobtrackai/feature/interviews/domain/repository/InterviewRepository.kt)
-Interface for:
-- `getInterviews(userId)`: Observe all upcoming interviews.
-- `scheduleInterview(interview)`: Save a new interview record.
-- `deleteInterview(interviewId)`: Remove or soft-delete an interview.
+### [feature:interviews]
+Integration of scheduling with background work.
 
-#### [NEW] UseCases
-- `GetInterviewsUseCase`
-- `ScheduleInterviewUseCase`
+#### [NEW] [InterviewReminderWorker.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/interviews/src/main/java/com/jobtrackai/feature/interviews/worker/InterviewReminderWorker.kt)
+A Hilt-enabled `CoroutineWorker` that:
+- Triggered by WorkManager.
+- Fetches the interview details by ID.
+- Invokes the `NotificationManager` to show the reminder.
 
-### [feature:interviews] - Data Layer
-#### [NEW] [InterviewRepositoryImpl.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/interviews/src/main/java/com/jobtrackai/feature/interviews/data/repository/InterviewRepositoryImpl.kt)
-Implementation using `InterviewDao`, `ApplicationDao`, and `JobDao` to build the complete `Interview` domain model.
+#### [NEW] [InterviewScheduler.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/interviews/src/main/java/com/jobtrackai/feature/interviews/domain/util/InterviewScheduler.kt)
+A helper class to:
+- Calculate initial delays for the 3 reminder intervals (24h, 1h, 15m).
+- Enqueue unique workers using `ExistingWorkPolicy.REPLACE` (to handle edits/rescheduling).
 
-### [feature:interviews] - Presentation Layer
-#### [NEW] [InterviewListViewModel.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/interviews/src/main/java/com/jobtrackai/feature/interviews/presentation/list/InterviewListViewModel.kt)
-Manages the list of upcoming interviews, sorted by date.
+#### [MODIFY] [InterviewRepositoryImpl.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/interviews/src/main/java/com/jobtrackai/feature/interviews/data/repository/InterviewRepositoryImpl.kt)
+Inject `InterviewScheduler` and trigger scheduling whenever an interview is saved or updated.
 
-#### [MODIFY] [InterviewsScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/interviews/src/main/java/com/jobtrackai/feature/interviews/list/InterviewsScreen.kt)
-Implement a list view showing interview cards with type, company, and time.
-
-#### [NEW] [AddInterviewScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/interviews/src/main/java/com/jobtrackai/feature/interviews/presentation/add/AddInterviewScreen.kt)
-Form to input interview details (Type, Date, Time, Link, Interviewer).
-
-### [feature:applications] - Integration
-#### [MODIFY] [ApplicationDetailsScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/applications/src/main/java/com/jobtrackai/feature/applications/presentation/details/ApplicationDetailsScreen.kt)
-Add a "Schedule Interview" button that navigates to the `AddInterview` screen.
+### [app]
+#### [MODIFY] [JobTrackApplication.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/app/src/main/java/com/jobtrackai/app/JobTrackApplication.kt)
+Initialize notification channels on app startup.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> **Date & Time Picking:** We will use Material 3 `DatePicker` and `TimePicker` for a professional scheduling experience.
+> **Permissions:** For devices running Android 13 (API 33) and above, we will need to request the `POST_NOTIFICATIONS` permission. We will add the logic to request this permission in the `AddInterviewScreen` or `InterviewsScreen`.
 
 ## Verification Plan
 
 ### Automated Tests
-- Unit tests for `InterviewListViewModel` to verify sorting and filtering.
-- Integration tests for `InterviewRepositoryImpl` to verify joined data fetching.
+- Unit tests for `InterviewScheduler` to verify delay calculations.
+- Verification of WorkManager enqueuing logic.
 
 ### Manual Verification
-- Navigate to an active application and click "Schedule Interview".
-- Fill in the details and save.
-- Verify the interview appears in the main **Interviews** tab.
-- Click a meeting link in the interview details and verify it opens correctly.
+- Schedule an interview for 25 hours from now.
+- Manually trigger the worker (via ADB or by setting the time closer) and verify the notification appears.
+- Reschedule an interview and verify the old workers are replaced and new reminders are enqueued.

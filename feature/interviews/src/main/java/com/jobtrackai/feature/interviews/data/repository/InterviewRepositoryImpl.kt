@@ -9,6 +9,7 @@ import com.jobtrackai.core.database.dao.JobDao
 import com.jobtrackai.core.database.entity.InterviewEntity
 import com.jobtrackai.feature.interviews.domain.model.Interview
 import com.jobtrackai.feature.interviews.domain.repository.InterviewRepository
+import com.jobtrackai.feature.interviews.domain.util.InterviewScheduler
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.util.UUID
@@ -17,7 +18,8 @@ import javax.inject.Inject
 class InterviewRepositoryImpl @Inject constructor(
     private val interviewDao: InterviewDao,
     private val applicationDao: ApplicationDao,
-    private val jobDao: JobDao
+    private val jobDao: JobDao,
+    private val interviewScheduler: InterviewScheduler
 ) : InterviewRepository {
 
     override fun getInterviews(userId: String): Flow<List<Interview>> {
@@ -36,6 +38,7 @@ class InterviewRepositoryImpl @Inject constructor(
 
     override suspend fun scheduleInterview(interview: Interview): DomainResult<Unit> = try {
         interviewDao.upsertInterview(interview.toEntity())
+        interviewScheduler.scheduleReminders(interview)
         DomainResult.Success(Unit)
     } catch (e: Exception) {
         DomainResult.Error(DomainError.DatabaseError(e.message))
@@ -43,6 +46,7 @@ class InterviewRepositoryImpl @Inject constructor(
 
     override suspend fun deleteInterview(interviewId: String): DomainResult<Unit> = try {
         interviewDao.softDeleteInterview(interviewId, java.time.Instant.now())
+        interviewScheduler.cancelReminders(interviewId)
         DomainResult.Success(Unit)
     } catch (e: Exception) {
         DomainResult.Error(DomainError.DatabaseError(e.message))
