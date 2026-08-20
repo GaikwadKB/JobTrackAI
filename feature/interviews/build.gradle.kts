@@ -41,6 +41,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
     implementation(project(":core:common"))
+    implementation(project(":core:sync"))
     implementation(project(":feature:jobs"))
     implementation(project(":feature:applications"))
     implementation(project(":feature:auth"))

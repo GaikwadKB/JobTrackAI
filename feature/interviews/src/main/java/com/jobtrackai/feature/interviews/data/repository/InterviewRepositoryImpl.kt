@@ -7,6 +7,9 @@ import com.jobtrackai.core.database.dao.ApplicationDao
 import com.jobtrackai.core.database.dao.InterviewDao
 import com.jobtrackai.core.database.dao.JobDao
 import com.jobtrackai.core.database.entity.InterviewEntity
+import com.jobtrackai.core.database.dao.SyncDao
+import com.jobtrackai.core.database.entity.SyncQueueEntity
+import com.jobtrackai.core.sync.domain.Syncable
 import com.jobtrackai.feature.interviews.domain.model.Interview
 import com.jobtrackai.feature.interviews.domain.repository.InterviewRepository
 import com.jobtrackai.feature.interviews.domain.util.InterviewScheduler
@@ -17,10 +20,11 @@ import javax.inject.Inject
 
 class InterviewRepositoryImpl @Inject constructor(
     private val interviewDao: InterviewDao,
+    private val syncDao: SyncDao,
     private val applicationDao: ApplicationDao,
     private val jobDao: JobDao,
     private val interviewScheduler: InterviewScheduler
-) : InterviewRepository {
+) : InterviewRepository, Syncable {
 
     override fun getInterviews(userId: String): Flow<List<Interview>> {
         return interviewDao.getInterviews(userId).map { entities ->
@@ -37,8 +41,10 @@ class InterviewRepositoryImpl @Inject constructor(
     }
 
     override suspend fun scheduleInterview(interview: Interview): DomainResult<Unit> = try {
-        interviewDao.upsertInterview(interview.toEntity())
+        val entity = interview.toEntity()
+        interviewDao.upsertInterview(entity)
         interviewScheduler.scheduleReminders(interview)
+        syncDao.addToQueue(SyncQueueEntity(entityType = "INTERVIEW", entityId = entity.id, operation = "INSERT"))
         DomainResult.Success(Unit)
     } catch (e: Exception) {
         DomainResult.Error(DomainError.DatabaseError(e.message))
@@ -47,9 +53,18 @@ class InterviewRepositoryImpl @Inject constructor(
     override suspend fun deleteInterview(interviewId: String): DomainResult<Unit> = try {
         interviewDao.softDeleteInterview(interviewId, java.time.Instant.now())
         interviewScheduler.cancelReminders(interviewId)
+        syncDao.addToQueue(SyncQueueEntity(entityType = "INTERVIEW", entityId = interviewId, operation = "DELETE"))
         DomainResult.Success(Unit)
     } catch (e: Exception) {
         DomainResult.Error(DomainError.DatabaseError(e.message))
+    }
+
+    override suspend fun sync(entityId: String, operation: String): DomainResult<Unit> = try {
+        // Mock remote sync
+        kotlinx.coroutines.delay(500)
+        DomainResult.Success(Unit)
+    } catch (e: Exception) {
+        DomainResult.Error(DomainError.Unknown(e.message))
     }
 }
 

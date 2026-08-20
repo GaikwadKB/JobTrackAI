@@ -7,6 +7,9 @@ import com.jobtrackai.core.common.sync.SyncStatus
 import com.jobtrackai.core.database.dao.ApplicationDao
 import com.jobtrackai.core.database.dao.JobDao
 import com.jobtrackai.core.database.entity.ApplicationEntity
+import com.jobtrackai.core.database.dao.SyncDao
+import com.jobtrackai.core.database.entity.SyncQueueEntity
+import com.jobtrackai.core.sync.domain.Syncable
 import com.jobtrackai.feature.applications.domain.model.Application
 import com.jobtrackai.feature.applications.domain.repository.ApplicationRepository
 import com.jobtrackai.feature.jobs.data.repository.toDomain
@@ -20,15 +23,17 @@ import javax.inject.Inject
 
 class ApplicationRepositoryImpl @Inject constructor(
     private val applicationDao: ApplicationDao,
+    private val syncDao: SyncDao,
     private val jobDao: JobDao
-) : ApplicationRepository {
+) : ApplicationRepository, Syncable {
 
     override suspend fun applyToJob(job: Job, userId: String): DomainResult<Unit> = try {
         // Ensure job is in local DB (or upsert it)
         jobDao.upsertJobs(listOf(job.toEntity()))
         
+        val appId = UUID.randomUUID().toString()
         val application = ApplicationEntity(
-            id = UUID.randomUUID().toString(),
+            id = appId,
             jobId = job.id,
             userId = userId,
             stage = ApplicationStage.APPLIED,
@@ -40,6 +45,7 @@ class ApplicationRepositoryImpl @Inject constructor(
             syncStatus = SyncStatus.PENDING
         )
         applicationDao.upsertApplication(application)
+        syncDao.addToQueue(SyncQueueEntity(entityType = "APPLICATION", entityId = appId, operation = "INSERT"))
         DomainResult.Success(Unit)
     } catch (e: Exception) {
         DomainResult.Error(DomainError.DatabaseError(e.message))
@@ -67,6 +73,7 @@ class ApplicationRepositoryImpl @Inject constructor(
                     syncStatus = SyncStatus.PENDING
                 )
             )
+            syncDao.addToQueue(SyncQueueEntity(entityType = "APPLICATION", entityId = applicationId, operation = "UPDATE"))
             DomainResult.Success(Unit)
         } else {
             DomainResult.Error(DomainError.NotFound("Application not found"))
@@ -76,10 +83,19 @@ class ApplicationRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateApplicationDetails(application: Application): DomainResult<Unit> = try {
-        applicationDao.upsertApplication(application.toEntity())
+        applicationDao.upsertApplication(application.toEntity().copy(syncStatus = SyncStatus.PENDING))
+        syncDao.addToQueue(SyncQueueEntity(entityType = "APPLICATION", entityId = application.id, operation = "UPDATE"))
         DomainResult.Success(Unit)
     } catch (e: Exception) {
         DomainResult.Error(DomainError.DatabaseError(e.message))
+    }
+
+    override suspend fun sync(entityId: String, operation: String): DomainResult<Unit> = try {
+        // Mock remote sync
+        kotlinx.coroutines.delay(500)
+        DomainResult.Success(Unit)
+    } catch (e: Exception) {
+        DomainResult.Error(DomainError.Unknown(e.message))
     }
 }
 
