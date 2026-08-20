@@ -59,4 +59,16 @@ sealed interface NavDestinations {
 
     @Serializable
     data class AddInterview(val applicationId: String) : NavDestinations
+
+    /**
+     * AI Features (Phase 15).
+     */
+    @Serializable
+    data object AIInterviewSetup : NavDestinations
+
+    @Serializable
+    data class AIMockInterview(val role: String, val level: String, val count: Int) : NavDestinations
+
+    @Serializable
+    data class AIInterviewResult(val sessionId: String) : NavDestinations
 }

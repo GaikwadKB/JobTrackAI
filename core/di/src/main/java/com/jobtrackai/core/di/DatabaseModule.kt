@@ -3,6 +3,7 @@ package com.jobtrackai.core.di
 import android.content.Context
 import androidx.room.Room
 import com.jobtrackai.core.database.AppDatabase
+import com.jobtrackai.core.database.dao.AIDao
 import com.jobtrackai.core.database.dao.ApplicationDao
 import com.jobtrackai.core.database.dao.InterviewDao
 import com.jobtrackai.core.database.dao.JobDao
@@ -47,4 +48,7 @@ object DatabaseModule {
 
     @Provides
     fun provideSyncDao(db: AppDatabase): SyncDao = db.syncDao()
+
+    @Provides
+    fun provideAIDao(db: AppDatabase): AIDao = db.aiDao()
 }

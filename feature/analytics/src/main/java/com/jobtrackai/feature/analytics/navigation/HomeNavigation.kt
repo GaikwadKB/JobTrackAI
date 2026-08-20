@@ -11,8 +11,10 @@ fun NavController.navigateToHome(navOptions: NavOptions? = null) {
     navigate(NavDestinations.Home, navOptions)
 }
 
-fun NavGraphBuilder.homeScreen() {
+fun NavGraphBuilder.homeScreen(
+    onStartAIInterviewClick: () -> Unit
+) {
     composable<NavDestinations.Home> {
-        HomeRoute()
+        HomeRoute(onStartAIInterviewClick = onStartAIInterviewClick)
     }
 }

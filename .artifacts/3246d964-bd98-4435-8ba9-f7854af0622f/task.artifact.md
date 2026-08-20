@@ -1,11 +1,16 @@
-# Tasks - Phase 14: AI Abstraction
+# Tasks - Phase 15: AI Interview
 
-- `[x]` Define AI Domain Models in `feature:ai`
-    - `[x]` `ChatMessage`
-    - `[x]` `AIAnalysis`
-- `[x]` Define `AIService` interface in `feature:ai`
-- `[x]` Implement `MockAIService` (Realistic data for Demo Mode)
-- `[x]` Implement `GeminiAIService` (Placeholder/Integration)
-- `[x]` Setup `AIModule` in `feature:ai`
-- `[x]` Unit tests for `MockAIService`
-- `[ ]` Verify AI responses via Logcat
+- `[x]` Update `NavDestinations` with AI routes
+- `[x]` Implement AI Room Entities and DAOs
+    - `[x]` `InterviewSessionEntity`
+    - `[x]` `InterviewQuestionEntity`
+    - `[x]` `InterviewAnswerEntity`
+    - `[x]` `AIDao`
+- `[x]` Update `AppDatabase` and bump version to `3`
+- `[x]` Implement `AIInterviewViewModel` state machine
+- `[x]` Implement `AIInterviewSetupScreen`
+- `[x]` Implement `AIMockInterviewScreen`
+- `[x]` Implement `AIInterviewResultScreen`
+- `[x]` Update `AiNavigation` sub-graph
+- `[x]` Unit tests for Interview state logic
+- `[ ]` Verify with end-to-end manual session
