@@ -13,6 +13,7 @@ import com.jobtrackai.feature.applications.navigation.navigateToApplications
 import com.jobtrackai.feature.applications.presentation.tracker.ApplicationTrackerViewModel
 import com.jobtrackai.feature.auth.navigation.authGraph
 import com.jobtrackai.feature.interviews.navigation.interviewsScreen
+import com.jobtrackai.feature.interviews.navigation.navigateToAddInterview
 import com.jobtrackai.feature.jobs.navigation.jobsScreen
 import com.jobtrackai.feature.jobs.navigation.navigateToJobDetails
 import com.jobtrackai.feature.profile.navigation.profileScreen
@@ -56,9 +57,12 @@ fun JobTrackNavHost(
         )
         applicationsScreen(
             onApplicationClick = { appId -> navController.navigateToApplicationDetails(appId) },
+            onBackClick = { navController.popBackStack() },
+            onScheduleInterviewClick = { appId -> navController.navigateToAddInterview(appId) }
+        )
+        interviewsScreen(
             onBackClick = { navController.popBackStack() }
         )
-        interviewsScreen()
         profileScreen()
     }
 }

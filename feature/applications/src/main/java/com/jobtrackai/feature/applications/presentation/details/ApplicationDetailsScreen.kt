@@ -10,6 +10,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -42,6 +45,7 @@ import com.jobtrackai.feature.applications.domain.model.Application
 fun ApplicationDetailsRoute(
     applicationId: String,
     onBackClick: () -> Unit,
+    onScheduleInterviewClick: (String) -> Unit,
     viewModel: ApplicationDetailsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -69,7 +73,8 @@ fun ApplicationDetailsRoute(
             ApplicationDetailsContent(
                 application = application,
                 onStageChanged = viewModel::updateStage,
-                onNotesChanged = viewModel::updateNotes
+                onNotesChanged = viewModel::updateNotes,
+                onScheduleInterviewClick = { onScheduleInterviewClick(application.id) }
             )
         }
     }
@@ -80,7 +85,8 @@ fun ApplicationDetailsRoute(
 internal fun ApplicationDetailsContent(
     application: Application,
     onStageChanged: (ApplicationStage) -> Unit,
-    onNotesChanged: (String) -> Unit
+    onNotesChanged: (String) -> Unit,
+    onScheduleInterviewClick: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -93,6 +99,17 @@ internal fun ApplicationDetailsContent(
         Text(text = application.job.title, style = MaterialTheme.typography.headlineSmall)
         Text(text = application.job.companyName, style = MaterialTheme.typography.titleMedium)
         
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = onScheduleInterviewClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(Icons.Default.CalendarToday, contentDescription = null)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = "Schedule Interview")
+        }
+
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(text = "Status", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
