@@ -1,11 +1,13 @@
-# Tasks - Phase 11: Notifications & Interview Reminders
+# Tasks - Phase 12: Offline-first Synchronization
 
-- `[x]` Implement `JobTrackNotificationManager` in `core:notifications`
-- `[x]` Define notification channels in `core:notifications`
-- `[x]` Implement `InterviewScheduler` in `feature:interviews`
-- `[x]` Implement `InterviewReminderWorker` in `feature:interviews`
-- `[x]` Wire `InterviewScheduler` into `InterviewRepositoryImpl`
-- `[x]` Initialize notification channels in `JobTrackApplication`
-- `[x]` Implement runtime notification permission request in `AddInterviewScreen`
-- `[x]` Unit tests for `InterviewScheduler` logic
-- `[x]` Verify with manual testing (simulated notifications)
+- `[ ]` Implement `NetworkMonitor` in `core:common`
+- `[ ]` Create `SyncRepository` interface in `core:sync`
+- `[ ]` Implement `SyncRepositoryImpl` in `core:sync`
+- `[ ]` Implement `SyncWorker` using WorkManager
+- `[ ]` Implement `SyncManager` orchestrator
+- `[ ]` Update `ProfileRepositoryImpl` to use `SyncDao` and `SyncManager`
+- `[ ]` Update `JobRepositoryImpl` to use `SyncDao` and `SyncManager`
+- `[ ]` Update `ApplicationRepositoryImpl` to use `SyncDao` and `SyncManager`
+- `[ ]` Wire `SyncManager` in `JobTrackApplication` for startup sync
+- `[ ]` Unit tests for `SyncRepositoryImpl`
+- `[ ]` Verify with Airplane Mode manual test

@@ -42,6 +42,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(project(":core:common"))
+    implementation(project(":core:sync"))
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
