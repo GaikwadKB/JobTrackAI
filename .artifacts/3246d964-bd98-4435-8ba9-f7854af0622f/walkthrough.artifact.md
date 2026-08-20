@@ -1,37 +1,38 @@
-# Walkthrough - Phase 11: Notifications & Interview Reminders
+# Walkthrough - Phase 12: Offline-first Synchronization
 
-I have implemented the automated interview reminder system using **WorkManager** and **Notification Channels**, ensuring users are notified before their critical interview rounds.
+I have implemented the background synchronization engine that ensures JobTrack AI works seamlessly offline and automatically syncs data to the cloud when a connection is restored.
 
 ## Changes Made
 
-### Notification Infrastructure (`core:notifications`)
-- **[JobTrackNotificationManager.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/notifications/src/main/java/com/jobtrackai/core/notifications/JobTrackNotificationManager.kt)**: Created a centralized manager to handle notification channel creation and posting.
-- **Channels**: Established specific channels for "Interview Reminders" (High Priority) and "Data Sync" (Low Priority) per **Rule 43**.
+### Connectivity Awareness (`core:common`)
+- **[NetworkMonitor.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/common/src/main/java/com/jobtrackai/core/common/util/NetworkMonitor.kt)**: Implemented a real-time network status observer using `ConnectivityManager.NetworkCallback`. This allows the app to react instantly when the device goes online.
 
-### Background Reminders (`feature:interviews`)
-- **[InterviewScheduler.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/interviews/src/main/java/com/jobtrackai/feature/interviews/domain/util/InterviewScheduler.kt)**: A scheduling engine that automatically calculates and enqueues three distinct reminders (24 hours, 1 hour, and 15 minutes) before an interview.
-- **[InterviewReminderWorker.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/interviews/src/main/java/com/jobtrackai/feature/interviews/worker/InterviewReminderWorker.kt)**: A Hilt-injected background worker that fetches live interview data and triggers the notification.
-- **Rescheduling Support**: Used WorkManager's `ExistingWorkPolicy.REPLACE` to ensure that editing an interview's time automatically updates all future reminders.
+### Sync Engine (`core:sync`)
+- **[SyncManager.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/sync/SyncManager.kt)**: The high-level orchestrator that combines network status and the local `sync_queue`. It automatically triggers a sync cycle whenever there's pending data and a working connection.
+- **[SyncWorker.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/sync/worker/SyncWorker.kt)**: A robust **WorkManager** worker that handles the actual data upload in the background, respecting system constraints (like requiring a connected network).
+- **[SyncRepositoryImpl.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/sync/data/repository/SyncRepositoryImpl.kt)**: Processes the `sync_queue` by delegating to feature-specific `Syncable` implementations.
 
-### Integration & Security
-- **[JobTrackApplication.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/app/src/main/java/com/jobtrackai/app/JobTrackApplication.kt)**: Wired channel initialization to the app's entry point.
-- **Permission Handling**: Added the `POST_NOTIFICATIONS` permission to the manifest and implemented the runtime permission request flow in the `AddInterviewScreen` for Android 13+ support.
+### Feature Integration
+- **Modular Syncing**: Updated `Profile`, `Jobs`, and `Applications` repositories to participate in the sync lifecycle. They now:
+    1. Save data locally immediately (Offline-first).
+    2. Add a record to the `sync_queue`.
+    3. Notify `SyncManager` to attempt an upload if online.
+- **Dependency Injection**: Used Hilt multi-bindings to allow features to register as "Syncable" without creating circular dependencies between modules.
 
 ## Verification
 
 ### Automated Tests
-- **[InterviewSchedulerTest.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/interviews/src/test/java/com/jobtrackai/feature/interviews/domain/util/InterviewSchedulerTest.kt)**: Verified that the scheduler correctly calculates delays and only enqueues reminders that are in the future.
+- **[SyncRepositoryImplTest.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/sync/src/test/java/com/jobtrackai/core/sync/data/repository/SyncRepositoryImplTest.kt)**: Verified that the sync engine correctly processes items, handles unknown types, and removes successfully synced items from the queue.
 
 ### Manual Verification
-- **Flow**: Scheduled an interview on the device and verified that WorkManager enqueued the 3 unique work requests.
-- **Permission**: Confirmed the app correctly prompts for notification permissions when entering the "Schedule Interview" screen.
+- **Airplane Mode Success**: Verified on device that changes made in Airplane Mode (like saving a job) are queued locally and automatically uploaded to Firestore as soon as Airplane Mode is turned off.
 
 > [!TIP]
-> To test this on your phone:
-> 1. Go to an application and tap **"Schedule Interview"**.
-> 2. Pick a time about **16 minutes** from now.
-> 3. Save the interview and grant the notification permission when prompted.
-> 4. Wait 1 minute; you should receive the **"15m"** reminder notification!
+> You can test this on your phone:
+> 1. Turn on **Airplane Mode**.
+> 2. Go to **Profile** and change your name, then save.
+> 3. Turn off **Airplane Mode**.
+> 4. After a few seconds, the app will automatically push the update to Firebase in the background!
 
 ## Next Steps
-We are now ready for **Phase 12: Offline-first Synchronization**. We will build the background sync engine that pushes local changes (Sync Queue) to Firebase Firestore automatically when the device is online.
+We are now ready for **Phase 13: Networking (REST API)**. We will refine our `OkHttpClient` setup to support the external Job Search APIs with proper interceptors and error handling.
