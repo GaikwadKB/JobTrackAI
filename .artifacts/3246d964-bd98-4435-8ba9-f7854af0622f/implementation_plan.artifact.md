@@ -1,53 +1,43 @@
-# Implementation Plan - Phase 12: Offline-first Synchronization
+# Implementation Plan - Phase 14: AI Abstraction
 
-This phase implements the background synchronization engine that ensures local changes made while offline are automatically uploaded to Firebase Firestore when the device regains connectivity. This fulfills **Rule 24 (Offline-first)** and **Rule 25 (Sync System)**.
+This phase establishes the abstraction layer for AI services as described in **Section 57**. To ensure security and flexibility, the app will interact with an `AIService` interface. This allows us to use a `MockAIService` for development and a `RemoteAIService` (hitting a secure proxy or direct API) for production, without exposing keys in the APK.
 
 ## Objective
-Build a robust, WorkManager-based synchronization system that processes the `sync_queue` and pushes local mutations to the cloud.
+Implement the foundational AI service layer to support future features like Mock Interviews and Career Assistant.
 
 ## Proposed Changes
 
-### [core:common]
-#### [NEW] [NetworkMonitor.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/common/src/main/java/com/jobtrackai/core/common/util/NetworkMonitor.kt)
-Utility to observe the device's connectivity status (Online/Offline) using `ConnectivityManager`.
+### [feature:ai] - Domain Layer
+#### [NEW] [AIService.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/ai/src/main/java/com/jobtrackai/feature/ai/domain/service/AIService.kt)
+The primary interface defining AI capabilities:
+- `chat(message: String, context: List<ChatMessage>): DomainResult<String>`
+- `generateInterviewQuestions(role, exp, difficulty): DomainResult<List<String>>`
+- `evaluateAnswer(question, answer): DomainResult<AIAnalysis>`
 
-### [core:sync]
-#### [NEW] [SyncRepository.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/sync/src/main/java/com/jobtrackai/core/sync/domain/SyncRepository.kt)
-Interface to trigger synchronization and manage the queue.
+#### [NEW] [ChatMessage.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/ai/src/main/java/com/jobtrackai/feature/ai/domain/model/ChatMessage.kt)
+Model for conversation history.
 
-#### [NEW] [SyncRepositoryImpl.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/sync/src/main/java/com/jobtrackai/core/sync/data/repository/SyncRepositoryImpl.kt)
-Processes the `SyncQueueEntity` items. For each item:
-- Fetches the current local state of the entity (Job, Application, etc.).
-- Invokes the corresponding Firestore update logic.
-- Removes the item from the queue on success.
+### [feature:ai] - Data Layer
+#### [NEW] [MockAIService.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/ai/src/main/java/com/jobtrackai/feature/ai/data/service/MockAIService.kt)
+A local implementation that returns realistic hardcoded responses for all AI methods. This will be the default in Debug builds.
 
-#### [NEW] [SyncWorker.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/sync/src/main/java/com/jobtrackai/core/sync/worker/SyncWorker.kt)
-A `CoroutineWorker` that runs with network constraints. It calls `SyncRepository.sync()` to process the queue.
+#### [NEW] [GeminiAIService.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/ai/src/main/java/com/jobtrackai/feature/ai/data/service/GeminiAIService.kt)
+A production implementation using the Gemini SDK or raw REST calls via `JobTrackHttpClient`.
 
-#### [NEW] [SyncManager.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/sync/src/main/java/com/jobtrackai/core/sync/SyncManager.kt)
-The entry point that observes the `sync_queue` and the `NetworkMonitor`. If items are pending and the device is online, it enqueues the `SyncWorker`.
-
-### [feature:*]
-#### [MODIFY] Repositories
-Update `ProfileRepositoryImpl`, `JobRepositoryImpl`, and `ApplicationRepositoryImpl` to:
-- Write to `SyncDao` whenever a local mutation occurs.
-- Trigger `SyncManager.requestSync()`.
+### [core:di]
+#### [NEW] [AIModule.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/di/src/main/java/com/jobtrackai/core/di/AIModule.kt)
+Wired to provide the `MockAIService` in debug mode (if `AI_MOCK_MODE_DEFAULT` is true) or the `RemoteAIService`.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> **Conflict Resolution:** In this phase, we will implement a "Last Write Wins" strategy. If a local change and a remote change conflict, the latest local update being synced will overwrite the remote version.
+> **Mock by Default:** To ensure the app is "Portfolio Ready" and immediately testable by recruiters without them needing to provide an API key, we will enable the Mock AI by default in Debug builds (**Rule 64**).
 
 ## Verification Plan
 
 ### Automated Tests
-- Unit tests for `SyncRepositoryImpl` simulating successful and failed sync operations.
-- Integration tests verifying that adding an item to the `sync_queue` eventually triggers the sync logic.
+- Unit tests for `MockAIService` to ensure it returns the expected data formats.
+- Unit tests for `GeminiAIService` (if implemented) with mocked networking.
 
 ### Manual Verification
-- **Airplane Mode Test:**
-    1. Turn off internet.
-    2. Save a job or update profile.
-    3. Verify data is saved locally but "PENDING" status is shown (if UI implemented).
-    4. Turn on internet.
-    5. Verify the data is automatically uploaded to Firestore and removed from the local `sync_queue`.
+- A temporary "AI Test" screen or Logcat log to verify that calling the service returns responses from the correct implementation (Mock vs. Remote).
