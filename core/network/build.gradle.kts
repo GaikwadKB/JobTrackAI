@@ -45,6 +45,11 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.okhttp)
+    
+    // Firebase Auth for AuthInterceptor
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth.ktx)
+    
     // Not debug-only: OkHttpClientProvider references this class in code
     // compiled for both variants, gating its *use* at runtime via
     // BuildConfig.DEBUG rather than its presence at compile time. The
@@ -54,6 +59,7 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.turbine)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.okhttp.mockwebserver)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
