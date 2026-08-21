@@ -1,6 +1,7 @@
 package com.jobtrackai.feature.applications.tracker
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -29,6 +30,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jobtrackai.core.common.model.ApplicationStage
 import com.jobtrackai.core.designsystem.component.UiStateContent
+import com.jobtrackai.core.designsystem.component.shimmer
 import com.jobtrackai.feature.applications.domain.model.Application
 import com.jobtrackai.feature.applications.presentation.tracker.ApplicationTrackerViewModel
 
@@ -47,12 +49,34 @@ fun ApplicationsRoute(
     ) { padding ->
         UiStateContent(
             state = uiState,
-            modifier = Modifier.padding(padding)
+            modifier = Modifier.padding(padding),
+            loadingContent = { KanbanLoading() }
         ) { groupedApps ->
             KanbanBoard(
                 groupedApps = groupedApps,
                 onApplicationClick = onApplicationClick
             )
+        }
+    }
+}
+
+@Composable
+fun KanbanLoading() {
+    LazyRow(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        items(3) {
+            Column(modifier = Modifier.width(280.dp)) {
+                Box(modifier = Modifier.width(100.dp).height(24.dp).shimmer())
+                Spacer(modifier = Modifier.height(16.dp))
+                repeat(4) {
+                    Card(modifier = Modifier.fillMaxWidth().height(100.dp).padding(vertical = 8.dp)) {
+                        Box(modifier = Modifier.fillMaxSize().shimmer())
+                    }
+                }
+            }
         }
     }
 }

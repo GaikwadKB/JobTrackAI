@@ -1,13 +1,11 @@
-# Tasks - Phase 18: Analytics & Dashboard
+# Tasks - Phase 24: Final Polish & Premium UX
 
-- `[x]` Define Analytics domain models in `core:common`
-- `[x]` Define `AnalyticsRepository` interface in `feature:analytics`
-- `[x]` Implement `AnalyticsRepositoryImpl` (Calculations via DAOs)
-- `[x]` Implement `GetAnalyticsUseCase`
-- `[x]` Create `Charts.kt` in `core:designsystem` (Bar, Donut, Line)
-- `[x]` Implement `AnalyticsViewModel`
-- `[x]` Implement `AnalyticsScreen` UI
-- `[x]` Update `HomeScreen` to show summary dashboard
-- `[x]` Setup Hilt for `feature:analytics`
-- `[x]` Unit tests for analytics calculations
-- `[ ]` Verify UI with sample data on device
+- `[x]` Add Splash Screen and Shimmer dependencies to `libs.versions.toml`
+- `[x]` Implement `Modifier.shimmer()` in `core:designsystem`
+- `[x]` Update `Charts.kt` with value animations
+- `[x]` Integrate Splash Screen API in `MainActivity`
+- `[x]` Configure sliding transitions in `JobTrackNavHost`
+- `[x]` Implement shimmer loading in `JobSearchScreen`
+- `[x]` Implement shimmer loading in `ApplicationsScreen`
+- `[x]` Implement shimmer loading in `InterviewsScreen`
+- `[x]` Final visual audit and accessibility check

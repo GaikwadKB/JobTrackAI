@@ -64,6 +64,7 @@ android {
 
 dependencies {
     // -- Core modules --
+    implementation(libs.androidx.core.splashscreen)
     implementation(project(":core:common"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:database"))

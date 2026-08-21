@@ -1,5 +1,6 @@
 package com.jobtrackai.feature.jobs.search
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -7,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -30,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jobtrackai.core.designsystem.component.UiStateContent
+import com.jobtrackai.core.designsystem.component.shimmer
 import com.jobtrackai.feature.jobs.domain.model.Job
 import com.jobtrackai.feature.jobs.presentation.search.JobSearchViewModel
 
@@ -63,7 +67,10 @@ fun JobSearchRoute(
                 singleLine = true
             )
 
-            UiStateContent(state = jobsState) { jobs ->
+            UiStateContent(
+                state = jobsState,
+                loadingContent = { JobSearchLoading() }
+            ) { jobs ->
                 LazyColumn(
                     modifier = Modifier.fillMaxSize()
                 ) {
@@ -76,6 +83,40 @@ fun JobSearchRoute(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun JobSearchLoading() {
+    Column(modifier = Modifier.fillMaxSize()) {
+        repeat(5) {
+            JobItemShimmer()
+        }
+    }
+}
+
+@Composable
+fun JobItemShimmer() {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Box(modifier = Modifier.width(150.dp).height(20.dp).shimmer())
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(modifier = Modifier.width(100.dp).height(16.dp).shimmer())
+                Spacer(modifier = Modifier.height(4.dp))
+                Box(modifier = Modifier.width(120.dp).height(12.dp).shimmer())
+            }
+            Box(modifier = Modifier.size(24.dp).shimmer())
         }
     }
 }

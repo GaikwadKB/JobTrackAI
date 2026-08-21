@@ -1,57 +1,43 @@
-# Implementation Plan - Phase 18: Analytics & Dashboard
+# Implementation Plan - Phase 24: Final Polish & Premium UX
 
-This phase implements the career analytics and professional dashboard as described in **Sections 19, 20, and 21**. We will transform the user's raw job search data into actionable insights using custom-built, lightweight Compose charts.
+This final phase focuses on elevating the app from a functional prototype to a production-quality product. We will implement smooth animations, professional loading states, and refine the overall user experience to ensure the app feels premium and portfolio-ready.
 
 ## Objective
-Build a data-driven dashboard that visualizes application progress, interview conversion rates, and AI preparation scores.
+Implement smooth transitions, professional shimmer effects, and animated data visualizations.
 
 ## Proposed Changes
 
-### [core:common]
-#### [NEW] [AnalyticsModels.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/common/src/main/java/com/jobtrackai/core/common/model/AnalyticsModels.kt)
-Domain models for stats: `ApplicationStats`, `InterviewStats`, `SkillDemand`.
+### [core:designsystem] - UI Refinement
+#### [NEW] [Shimmer.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/designsystem/src/main/java/com/jobtrackai/core/designsystem/component/Shimmer.kt)
+Create a reusable `Modifier.shimmer()` extension to provide professional loading states instead of basic progress bars (Rule 36).
 
-### [feature:analytics] - Domain Layer
-#### [NEW] [AnalyticsRepository.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/analytics/src/main/java/com/jobtrackai/feature/analytics/domain/repository/AnalyticsRepository.kt)
-Interface to fetch calculated statistics from local storage.
+#### [MODIFY] [Charts.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/designsystem/src/main/java/com/jobtrackai/core/designsystem/component/Charts.kt)
+Add `animateFloatAsState` to chart values (sweep angles, bar heights) so they animate when the screen is opened.
 
-#### [NEW] [GetAnalyticsUseCase.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/analytics/src/main/java/com/jobtrackai/feature/analytics/domain/usecase/GetAnalyticsUseCase.kt)
-Aggregates data from Jobs, Applications, and AI Sessions to produce a dashboard summary.
+### [app] - Orchestration Polish
+#### [MODIFY] [MainActivity.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/app/src/main/java/com/jobtrackai/app/MainActivity.kt)
+Integrate the **Android 12 Splash Screen API** for a seamless transition from the OS to the app UI.
 
-### [feature:analytics] - Data Layer
-#### [NEW] [AnalyticsRepositoryImpl.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/analytics/src/main/java/com/jobtrackai/feature/analytics/data/repository/AnalyticsRepositoryImpl.kt)
-Calculates stats using Room DAOs (ApplicationDao, JobDao, AIDao).
+#### [MODIFY] [JobTrackNavHost.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/app/src/main/java/com/jobtrackai/app/navigation/JobTrackNavHost.kt)
+Configure global navigation transitions:
+- **Enter:** Slide in from the right.
+- **Exit:** Slide out to the left.
+- **Pop Enter:** Slide in from the left.
+- **Pop Exit:** Slide out to the right.
 
-### [core:designsystem]
-#### [NEW] [Charts.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/designsystem/src/main/java/com/jobtrackai/core/designsystem/component/Charts.kt)
-Reusable, custom Compose-based chart components:
-- `BarChart`: For "Applications by Month".
-- `DonutChart`: For "Applications by Stage".
-- `LineChart`: For "AI Score Progress".
-
-### [feature:analytics] - Presentation Layer
-#### [NEW] [AnalyticsViewModel.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/analytics/src/main/java/com/jobtrackai/feature/analytics/presentation/AnalyticsViewModel.kt)
-Orchestrates the dashboard state.
-
-#### [NEW] [AnalyticsScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/analytics/src/main/java/com/jobtrackai/feature/analytics/presentation/AnalyticsScreen.kt)
-The primary UI showing the charts and high-level KPIs (Response Rate, Offer Rate).
-
-### [app]
-#### [MODIFY] [HomeScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/analytics/src/main/java/com/jobtrackai/feature/analytics/home/HomeScreen.kt)
-Update the Home tab to show a mini-dashboard summary instead of just a placeholder.
+### [feature:*] - Visual Polish
+#### [MODIFY] List Screens
+Update `JobSearchScreen`, `ApplicationsScreen`, and `InterviewsScreen` to replace `CircularProgressIndicator` with shimmer cards that mimic the content layout.
 
 ## User Review Required
 
-> [!TIP]
-> **Performance:** We will perform analytics calculations on the background thread using Room's aggregate functions and Kotlin's `groupBy` to keep the UI buttery smooth even with hundreds of applications.
+> [!IMPORTANT]
+> This phase introduces many visual changes. We will use standard Material 3 motion guidelines to keep animations subtle and professional (Rule 28).
 
 ## Verification Plan
 
-### Automated Tests
-- Unit tests for `AnalyticsRepositoryImpl` to verify that conversion rates (e.g., Application -> Interview) are calculated correctly.
-- Screenshot tests for the custom chart components.
-
 ### Manual Verification
-- Add several job applications and interviews.
-- Navigate to the **Analytics** tab (Home).
-- Verify that the charts accurately reflect the data entered (e.g., if you have 2 "Applied" and 1 "Interview", the Donut chart should show a 2:1 ratio).
+- **Cold Start:** Verify the splash screen appears and transitions smoothly to the Login/Dashboard.
+- **Motion:** Navigate through all bottom tabs and verify consistent sliding transitions.
+- **Data Loading:** Trigger a search or refresh and verify the shimmer effect provides a high-quality "loading" feel.
+- **Visualization:** Open the Analytics tab and verify charts "grow" into place with smooth animations.
