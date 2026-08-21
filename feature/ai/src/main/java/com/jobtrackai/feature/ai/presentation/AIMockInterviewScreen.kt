@@ -1,5 +1,9 @@
 package com.jobtrackai.feature.ai.presentation
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.MicNone
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,6 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,9 +36,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jobtrackai.feature.speech.domain.SpeechState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,6 +52,15 @@ fun AIMockInterviewRoute(
     viewModel: AIInterviewViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val speechState by viewModel.speechManager.state.collectAsStateWithLifecycle()
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.speechManager.startListening()
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.startSession(role, level, count)
@@ -52,6 +69,12 @@ fun AIMockInterviewRoute(
     LaunchedEffect(uiState.status) {
         if (uiState.status is SessionStatus.Completed) {
             onFinish(uiState.sessionId ?: "")
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.speechManager.reset()
         }
     }
 
@@ -75,7 +98,15 @@ fun AIMockInterviewRoute(
                 SessionStatus.Answering -> {
                     AIMockInterviewContent(
                         uiState = uiState,
-                        onSubmit = viewModel::submitAnswer
+                        speechState = speechState,
+                        onSubmit = viewModel::submitAnswer,
+                        onMicClick = {
+                            if (speechState is SpeechState.Listening) {
+                                viewModel.speechManager.stopListening()
+                            } else {
+                                permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                            }
+                        }
                     )
                 }
                 is SessionStatus.Error -> {
@@ -90,10 +121,19 @@ fun AIMockInterviewRoute(
 @Composable
 internal fun AIMockInterviewContent(
     uiState: AIInterviewUiState,
-    onSubmit: (String) -> Unit
+    speechState: SpeechState,
+    onSubmit: (String) -> Unit,
+    onMicClick: () -> Unit
 ) {
     var answerText by remember { mutableStateOf("") }
     val progress = (uiState.currentQuestionIndex.toFloat() / uiState.questions.size.toFloat())
+
+    // Update answer text when speech results come in
+    LaunchedEffect(speechState) {
+        if (speechState is SpeechState.Result) {
+            answerText = speechState.text
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -125,11 +165,35 @@ internal fun AIMockInterviewContent(
             modifier = Modifier.fillMaxWidth().weight(1f),
             label = { Text("Your Answer") },
             trailingIcon = {
-                IconButton(onClick = { /* Phase 16: Voice */ }) {
-                    Icon(Icons.Default.Mic, contentDescription = "Speak")
+                IconButton(onClick = onMicClick) {
+                    val icon = if (speechState is SpeechState.Listening) Icons.Default.Mic else Icons.Default.MicNone
+                    val tint = if (speechState is SpeechState.Listening) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = "Speak",
+                        tint = tint
+                    )
                 }
             }
         )
+
+        if (speechState is SpeechState.Listening) {
+            Text(
+                text = "Listening...",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        }
+
+        if (speechState is SpeechState.Error) {
+            Text(
+                text = speechState.message,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 

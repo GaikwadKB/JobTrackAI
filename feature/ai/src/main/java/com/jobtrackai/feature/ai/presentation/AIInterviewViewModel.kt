@@ -7,11 +7,13 @@ import com.jobtrackai.core.database.dao.AIDao
 import com.jobtrackai.core.database.entity.InterviewAnswerEntity
 import com.jobtrackai.core.database.entity.InterviewQuestionEntity
 import com.jobtrackai.core.database.entity.InterviewSessionEntity
-import com.jobtrackai.feature.ai.domain.model.AIAnalysis
 import com.jobtrackai.feature.ai.domain.service.AIService
 import com.jobtrackai.feature.auth.domain.usecase.GetAuthStateUseCase
+import com.jobtrackai.feature.speech.domain.SpeechRecognizerManager
+import com.jobtrackai.feature.speech.domain.SpeechState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
@@ -24,7 +26,8 @@ import javax.inject.Inject
 class AIInterviewViewModel @Inject constructor(
     private val aiService: AIService,
     private val getAuthStateUseCase: GetAuthStateUseCase,
-    private val aiDao: AIDao
+    private val aiDao: AIDao,
+    val speechManager: SpeechRecognizerManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AIInterviewUiState())

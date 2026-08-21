@@ -1,16 +1,11 @@
-# Tasks - Phase 15: AI Interview
+# Tasks - Phase 16: Speech-to-Text Integration
 
-- `[x]` Update `NavDestinations` with AI routes
-- `[x]` Implement AI Room Entities and DAOs
-    - `[x]` `InterviewSessionEntity`
-    - `[x]` `InterviewQuestionEntity`
-    - `[x]` `InterviewAnswerEntity`
-    - `[x]` `AIDao`
-- `[x]` Update `AppDatabase` and bump version to `3`
-- `[x]` Implement `AIInterviewViewModel` state machine
-- `[x]` Implement `AIInterviewSetupScreen`
-- `[x]` Implement `AIMockInterviewScreen`
-- `[x]` Implement `AIInterviewResultScreen`
-- `[x]` Update `AiNavigation` sub-graph
-- `[x]` Unit tests for Interview state logic
-- `[ ]` Verify with end-to-end manual session
+- `[x]` Define `SpeechRecognizerManager` interface in `feature:speech`
+- `[x]` Implement `AndroidSpeechRecognizerManager` in `feature:speech`
+- `[x]` Create `SpeechModule` in `feature:speech` (or `core:di`)
+- `[x]` Update `feature:speech` dependencies
+- `[x]` Add `RECORD_AUDIO` permission to `feature:speech` Manifest
+- `[x]` Implement `SpeechState` models
+- `[x]` Integrate `SpeechRecognizerManager` into `AIMockInterviewScreen`
+- `[x]` Handle microphone permission request in UI
+- `[ ]` Verify voice-to-text on physical device
