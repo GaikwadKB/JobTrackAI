@@ -1,51 +1,47 @@
-# Implementation Plan - Phase 15: AI Interview
+# Implementation Plan - Phase 17: Text-to-Speech Integration
 
-This phase implements the interactive AI mock interview experience as described in **Sections 13, 14, and 15**. Users will be able to configure an interview session, practice with AI-generated questions, and receive a detailed evaluation report.
+This phase implements Text-to-Speech (TTS) capabilities for the AI Mock Interview feature as described in **Section 18**. This allows the AI interviewer to read the questions aloud, creating a fully immersive and professional practice environment.
 
 ## Objective
-Build the end-to-end mock interview flow, including setup, session management, and feedback analysis.
+Integrate the Android `TextToSpeech` API to provide audible questions during mock interviews.
 
 ## Proposed Changes
 
-### [core:common]
-#### [MODIFY] [NavDestinations.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/common/src/main/java/com/jobtrackai/core/common/navigation/NavDestinations.kt)
-Add routes for AI features:
-- `AIInterviewSetup`
-- `AIMockInterview(val role: String, val level: String, val count: Int)`
-- `AIInterviewResult(val sessionId: String)`
+### [feature:speech] - Domain Layer
+#### [NEW] [TextToSpeechManager.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/speech/src/main/java/com/jobtrackai/feature/speech/domain/TextToSpeechManager.kt)
+An interface defining the contract for speaking text:
+- `speak(text: String)`
+- `stop()`
+- `isReady`: A `StateFlow<Boolean>` indicating if the TTS engine is initialized.
 
-### [core:database]
-Add persistence for AI sessions (Section 23).
-#### [NEW] [AI Entities](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/database/src/main/java/com/jobtrackai/core/database/entity/)
-- `InterviewSessionEntity`: Tracks metadata (role, date, overall score).
-- `InterviewQuestionEntity`: The AI-generated questions for a session.
-- `InterviewAnswerEntity`: User's transcript and AI's per-question feedback.
+### [feature:speech] - Data Layer
+#### [NEW] [AndroidTextToSpeechManager.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/speech/src/main/java/com/jobtrackai/feature/speech/data/AndroidTextToSpeechManager.kt)
+Implementation using the native Android `TextToSpeech` class. It will:
+- Initialize the engine with the device's default locale.
+- Handle initialization callbacks.
+- Manage the audio focus and engine lifecycle.
 
-#### [NEW] [AIDao.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/database/src/main/java/com/jobtrackai/core/database/dao/AIDao.kt)
-DAO for saving and retrieving session history.
+### [feature:ai] - Integration
+#### [MODIFY] [AIMockInterviewScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/ai/src/main/java/com/jobtrackai/feature/ai/presentation/AIMockInterviewScreen.kt)
+- Inject `TextToSpeechManager`.
+- Add a "Speaker" icon next to the question text.
+- Automatically speak the question when it first appears (with a user-toggleable setting).
+- Ensure speech stops if the user navigates away or moves to the next question.
 
-### [feature:ai] - Presentation Layer
-#### [NEW] [AIInterviewViewModel.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/ai/src/main/java/com/jobtrackai/feature/ai/presentation/AIInterviewViewModel.kt)
-Orchestrates the state machine: `Setup` -> `Generating` -> `Question (1..N)` -> `Evaluating` -> `Result`.
-
-#### [NEW] [AI Screens](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/ai/src/main/java/com/jobtrackai/feature/ai/presentation/)
-- `AIInterviewSetupScreen`: Selection for Role (Android, Java, etc.), Experience, and Difficulty.
-- `AIMockInterviewScreen`: Interactive UI showing the current question and an input field for the answer (with a placeholder for voice integration).
-- `AIInterviewResultScreen`: Detailed report showing scores (Technical, Communication) and improvement points.
+### [core:di]
+#### [MODIFY] [SpeechModule.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/speech/src/main/java/com/jobtrackai/feature/speech/data/di/SpeechModule.kt)
+Provide the `TextToSpeechManager` implementation.
 
 ## User Review Required
 
-> [!IMPORTANT]
-> **Persistence:** Mock interview sessions will be saved locally in Room, allowing users to review their previous performance in the "Analytics" or "Profile" tabs later.
+> [!NOTE]
+> **Audio Volume:** The app will use the "Music" (Media) volume stream for speech.
+> **Language Support:** We will default to the device language, but the UI will show an error if the engine cannot support the selected language.
 
 ## Verification Plan
 
-### Automated Tests
-- Unit tests for `AIInterviewViewModel` to verify the state machine transitions.
-- Unit tests for the "Scoring" transformation logic (Section 15).
-
 ### Manual Verification
-- Navigate to the AI Prep area.
-- Configure a session for "Android Developer" with 3 questions.
-- Complete the interview and verify the "Result" screen displays scores and suggested answers.
-- Verify that the session appears in the local database via App Inspection.
+- Start a Mock Interview session.
+- Verify that the AI reads the first question automatically.
+- Tap the speaker icon to repeat the question.
+- Verify that clicking "Stop" or navigating back immediately kills the audio.

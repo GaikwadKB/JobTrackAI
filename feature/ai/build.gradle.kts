@@ -62,6 +62,7 @@ dependencies {
     implementation(project(":core:datastore"))
     implementation(project(":core:sync"))
     implementation(project(":feature:auth"))
+    implementation(project(":feature:speech"))
     implementation(libs.androidx.navigation.compose)
     testImplementation(libs.junit4)
     testImplementation(libs.mockk)

@@ -1,16 +1,9 @@
-# Tasks - Phase 15: AI Interview
+# Tasks - Phase 17: Text-to-Speech Integration
 
-- `[x]` Update `NavDestinations` with AI routes
-- `[x]` Implement AI Room Entities and DAOs
-    - `[x]` `InterviewSessionEntity`
-    - `[x]` `InterviewQuestionEntity`
-    - `[x]` `InterviewAnswerEntity`
-    - `[x]` `AIDao`
-- `[x]` Update `AppDatabase` and bump version to `3`
-- `[x]` Implement `AIInterviewViewModel` state machine
-- `[x]` Implement `AIInterviewSetupScreen`
-- `[x]` Implement `AIMockInterviewScreen`
-- `[x]` Implement `AIInterviewResultScreen`
-- `[x]` Update `AiNavigation` sub-graph
-- `[x]` Unit tests for Interview state logic
-- `[ ]` Verify with end-to-end manual session
+- `[x]` Define `TextToSpeechManager` interface in `feature:speech`
+- `[x]` Implement `AndroidTextToSpeechManager` in `feature:speech`
+- `[x]` Update `SpeechModule` in `feature:speech`
+- `[x]` Update `AIInterviewViewModel` to handle question speech logic
+- `[x]` Integrate `TextToSpeechManager` into `AIMockInterviewScreen` UI
+- `[x]` Add "Speak Question" toggle/replay button to UI
+- `[x]` Verify audio playback on device
