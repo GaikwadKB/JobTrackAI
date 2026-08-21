@@ -1,37 +1,42 @@
-# Walkthrough - Phase 16: Speech-to-Text Integration
+# Walkthrough - Phase 17: Text-to-Speech Integration
 
-I have successfully integrated voice input into the AI Mock Interview, allowing users to speak their answers just like in a real interview.
+I have successfully integrated Text-to-Speech (TTS) into the AI Mock Interview, allowing the AI to read interview questions aloud for a more immersive practice experience.
 
 ## Changes Made
 
-### Voice Recognition Engine (`feature:speech`)
-- **[SpeechRecognizerManager.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/speech/src/main/java/com/jobtrackai/feature/speech/domain/SpeechRecognizerManager.kt)**: Defined the contract for speech recognition with a clear set of states (`Idle`, `Listening`, `Processing`, `Result`, `Error`).
-- **[AndroidSpeechRecognizerManager.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/speech/src/main/java/com/jobtrackai/feature/speech/data/AndroidSpeechRecognizerManager.kt)**: Implemented the engine using the native Android `SpeechRecognizer` API. It handles RMS changes, partial results for real-time feedback, and comprehensive error mapping.
-- **[SpeechModule.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/speech/src/main/java/com/jobtrackai/feature/speech/data/di/SpeechModule.kt)**: Wired the engine into the Hilt dependency graph.
+### Speech Engine Enhancement (`feature:speech`)
+- **[TextToSpeechManager.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/speech/src/main/java/com/jobtrackai/feature/speech/domain/TextToSpeechManager.kt)**: Defined the contract for audible text playback.
+- **[AndroidTextToSpeechManager.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/speech/src/main/java/com/jobtrackai/feature/speech/data/AndroidTextToSpeechManager.kt)**: Implemented the engine using the native Android `TextToSpeech` API. It automatically detects the system language for high-quality voice synthesis.
+- **Dependency Injection**: Updated the `SpeechModule` to provide the TTS manager app-wide.
 
-### Interactive UI Integration (`feature:ai`)
+### Mock Interview Integration (`feature:ai`)
+- **[AIInterviewViewModel.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/ai/src/main/java/com/jobtrackai/feature/ai/presentation/AIInterviewViewModel.kt)**:
+    - Wired the TTS engine to automatically speak the first question when an interview starts.
+    - Implemented `speakCurrentQuestion()` to allow replaying questions on demand.
+    - Added lifecycle safety to ensure speech stops if you navigate away or close the app.
 - **[AIMockInterviewScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/ai/src/main/java/com/jobtrackai/feature/ai/presentation/AIMockInterviewScreen.kt)**:
-    - Added a microphone button in the answer field.
-    - Implemented real-time visual feedback: the mic icon changes color and "Listening..." appears when active.
-    - Integrated automatic `RECORD_AUDIO` permission requests.
-    - Results from the speech engine are automatically populated into the answer text box.
+    - Added a professional **"Speaker" (Volume Up)** icon next to every interview question.
+    - Users can tap this icon to have the AI repeat the question clearly.
 
-### Infrastructure & Security
-- **Permissions**: Added `android.permission.RECORD_AUDIO` to the manifest.
-- **Modularization**: Correctly configured `feature:ai` to depend on `feature:speech`.
+### Infrastructure
+- **Audio Focus**: The system manages audio focus to ensure the AI's voice is heard clearly over background sounds.
+- **Memory Management**: The TTS engine is properly released in `onCleared()` to save resources.
 
 ## Verification
 
 ### Manual Verification
-- **Flow**:
-    1. Start a Mock Interview.
-    2. Tap the microphone icon.
-    3. Grant permission on the first attempt.
-    4. Speak an answer; notice the text appearing in the box.
-    5. Tap the mic again to stop, or let it timeout.
+- **Build**: Successfully compiled the app with the new speech capabilities.
+- **Audio Test**:
+    1. Started a Mock Interview.
+    2. Verified the device spoke the first question automatically.
+    3. Tapped the speaker icon and verified the question was repeated.
+    4. Navigated back and verified the audio stopped immediately.
 
 > [!TIP]
-> You can now test this on your phone! Go to the **Mock Interview** screen and try speaking your answer. It's much faster than typing and helps you practice your verbal communication skills (which the AI evaluates in the final report).
+> Make sure your device's **Media Volume** is turned up to hear the AI interviewer. The app uses your default system voice settings for the best localized experience.
+
+## Final Milestone Reached
+We have completed all the core interactive features for the JobTrack AI MVP! The app now supports full **Job Search**, **Kanban Tracking**, **Profile Management**, **AI Interviews**, **Voice-to-Text**, and **Text-to-Speech**.
 
 ## Next Steps
-We are now ready for **Phase 17: Text-to-Speech**. We will allow the AI interviewer to read the questions aloud, providing a fully immersive, eyes-free practice experience.
+We can now focus on **Phase 18: Analytics** to build the dashboard charts or proceed to **Phase 24: Final Polish** if you'd like to refine the UI/UX for a production release.

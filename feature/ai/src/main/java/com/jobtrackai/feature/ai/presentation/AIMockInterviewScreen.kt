@@ -6,6 +6,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicNone
+import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -100,6 +102,7 @@ fun AIMockInterviewRoute(
                         uiState = uiState,
                         speechState = speechState,
                         onSubmit = viewModel::submitAnswer,
+                        onReplay = viewModel::speakCurrentQuestion,
                         onMicClick = {
                             if (speechState is SpeechState.Listening) {
                                 viewModel.speechManager.stopListening()
@@ -123,6 +126,7 @@ internal fun AIMockInterviewContent(
     uiState: AIInterviewUiState,
     speechState: SpeechState,
     onSubmit: (String) -> Unit,
+    onReplay: () -> Unit,
     onMicClick: () -> Unit
 ) {
     var answerText by remember { mutableStateOf("") }
@@ -152,10 +156,16 @@ internal fun AIMockInterviewContent(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text(
-            text = uiState.currentQuestion?.text ?: "",
-            style = MaterialTheme.typography.headlineSmall
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = uiState.currentQuestion?.text ?: "",
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.weight(1f)
+            )
+            IconButton(onClick = onReplay) {
+                Icon(Icons.Default.VolumeUp, contentDescription = "Read aloud")
+            }
+        }
 
         Spacer(modifier = Modifier.height(32.dp))
 

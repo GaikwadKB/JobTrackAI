@@ -1,7 +1,9 @@
 package com.jobtrackai.feature.speech.data.di
 
 import com.jobtrackai.feature.speech.data.AndroidSpeechRecognizerManager
+import com.jobtrackai.feature.speech.data.AndroidTextToSpeechManager
 import com.jobtrackai.feature.speech.domain.SpeechRecognizerManager
+import com.jobtrackai.feature.speech.domain.TextToSpeechManager
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -17,4 +19,10 @@ abstract class SpeechModule {
     abstract fun bindSpeechRecognizerManager(
         impl: AndroidSpeechRecognizerManager
     ): SpeechRecognizerManager
+
+    @Binds
+    @Singleton
+    abstract fun bindTextToSpeechManager(
+        impl: AndroidTextToSpeechManager
+    ): TextToSpeechManager
 }

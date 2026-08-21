@@ -1,50 +1,47 @@
-# Implementation Plan - Phase 16: Speech-to-Text Integration
+# Implementation Plan - Phase 17: Text-to-Speech Integration
 
-This phase implements voice input for the AI Mock Interview feature as described in **Section 17**. Users will be able to speak their answers, which will be converted to text in real-time and populated into the answer field.
+This phase implements Text-to-Speech (TTS) capabilities for the AI Mock Interview feature as described in **Section 18**. This allows the AI interviewer to read the questions aloud, creating a fully immersive and professional practice environment.
 
 ## Objective
-Integrate the Android `SpeechRecognizer` API to provide a hands-free, realistic interview experience.
+Integrate the Android `TextToSpeech` API to provide audible questions during mock interviews.
 
 ## Proposed Changes
 
 ### [feature:speech] - Domain Layer
-#### [NEW] [SpeechRecognizerManager.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/speech/src/main/java/com/jobtrackai/feature/speech/domain/SpeechRecognizerManager.kt)
-An interface defining the voice-to-text contract:
-- `startListening()`
-- `stopListening()`
-- `state`: A `Flow` emitting `Idle`, `Listening`, `Processing`, `Result(text)`, `Error(msg)`.
+#### [NEW] [TextToSpeechManager.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/speech/src/main/java/com/jobtrackai/feature/speech/domain/TextToSpeechManager.kt)
+An interface defining the contract for speaking text:
+- `speak(text: String)`
+- `stop()`
+- `isReady`: A `StateFlow<Boolean>` indicating if the TTS engine is initialized.
 
 ### [feature:speech] - Data Layer
-#### [NEW] [AndroidSpeechRecognizerManager.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/speech/src/main/java/com/jobtrackai/feature/speech/data/AndroidSpeechRecognizerManager.kt)
-Implementation using the native Android `SpeechRecognizer` and `RecognitionListener`.
-
-### [feature:speech] - Presentation Layer
-#### [NEW] [VoiceInputHandler.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/speech/src/main/java/com/jobtrackai/feature/speech/presentation/VoiceInputHandler.kt)
-A Compose-friendly helper or ViewModel to manage the UI state of the microphone button and permission requests.
+#### [NEW] [AndroidTextToSpeechManager.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/speech/src/main/java/com/jobtrackai/feature/speech/data/AndroidTextToSpeechManager.kt)
+Implementation using the native Android `TextToSpeech` class. It will:
+- Initialize the engine with the device's default locale.
+- Handle initialization callbacks.
+- Manage the audio focus and engine lifecycle.
 
 ### [feature:ai] - Integration
 #### [MODIFY] [AIMockInterviewScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/ai/src/main/java/com/jobtrackai/feature/ai/presentation/AIMockInterviewScreen.kt)
-- Add a "Record" button next to the text input.
-- Handle `RECORD_AUDIO` permission request.
-- Update the text field with results from the `SpeechRecognizerManager`.
+- Inject `TextToSpeechManager`.
+- Add a "Speaker" icon next to the question text.
+- Automatically speak the question when it first appears (with a user-toggleable setting).
+- Ensure speech stops if the user navigates away or moves to the next question.
 
 ### [core:di]
-#### [NEW] [SpeechModule.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/di/src/main/java/com/jobtrackai/core/di/SpeechModule.kt)
-Provide the `SpeechRecognizerManager` implementation.
+#### [MODIFY] [SpeechModule.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/speech/src/main/java/com/jobtrackai/feature/speech/data/di/SpeechModule.kt)
+Provide the `TextToSpeechManager` implementation.
 
 ## User Review Required
 
-> [!IMPORTANT]
-> **Permission Management:** The app will request `RECORD_AUDIO` permission the first time the user taps the microphone icon.
-> **Device Support:** Speech recognition depends on Google Play Services or on-device engines. We will add a fallback/error message if the service is unavailable on the device.
+> [!NOTE]
+> **Audio Volume:** The app will use the "Music" (Media) volume stream for speech.
+> **Language Support:** We will default to the device language, but the UI will show an error if the engine cannot support the selected language.
 
 ## Verification Plan
 
-### Automated Tests
-- Unit tests for the `SpeechRecognizerManager` state flow using a mocked Android `SpeechRecognizer`.
-
 ### Manual Verification
-- Navigate to an AI Mock Interview session.
-- Tap the microphone icon and grant permission.
-- Speak a sentence and verify that the text appears accurately in the answer box.
-- Verify that background noise or silence is handled gracefully (via error or timeout).
+- Start a Mock Interview session.
+- Verify that the AI reads the first question automatically.
+- Tap the speaker icon to repeat the question.
+- Verify that clicking "Stop" or navigating back immediately kills the audio.

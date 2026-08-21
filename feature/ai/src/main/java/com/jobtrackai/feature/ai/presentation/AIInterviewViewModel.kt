@@ -11,6 +11,7 @@ import com.jobtrackai.feature.ai.domain.service.AIService
 import com.jobtrackai.feature.auth.domain.usecase.GetAuthStateUseCase
 import com.jobtrackai.feature.speech.domain.SpeechRecognizerManager
 import com.jobtrackai.feature.speech.domain.SpeechState
+import com.jobtrackai.feature.speech.domain.TextToSpeechManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,7 +28,8 @@ class AIInterviewViewModel @Inject constructor(
     private val aiService: AIService,
     private val getAuthStateUseCase: GetAuthStateUseCase,
     private val aiDao: AIDao,
-    val speechManager: SpeechRecognizerManager
+    val speechManager: SpeechRecognizerManager,
+    private val ttsManager: TextToSpeechManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AIInterviewUiState())
@@ -68,6 +70,8 @@ class AIInterviewViewModel @Inject constructor(
                             currentQuestion = firstQuestion,
                             status = SessionStatus.Answering
                         )}
+                        
+                        speakCurrentQuestion()
                     }
                 }
                 is DomainResult.Error -> {
@@ -82,6 +86,7 @@ class AIInterviewViewModel @Inject constructor(
         val currentQuestion = _uiState.value.currentQuestion ?: return
 
         viewModelScope.launch {
+            ttsManager.stop()
             _uiState.update { it.copy(isEvaluating = true) }
             
             val result = aiService.evaluateAnswer(currentQuestion.text, answer)
@@ -108,6 +113,7 @@ class AIInterviewViewModel @Inject constructor(
                             currentQuestion = questionsFromDb[nextIndex],
                             isEvaluating = false
                         )}
+                        speakCurrentQuestion()
                     } else {
                         _uiState.update { it.copy(status = SessionStatus.Completed, isEvaluating = false) }
                     }
@@ -117,6 +123,16 @@ class AIInterviewViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun speakCurrentQuestion() {
+        val question = _uiState.value.currentQuestion?.text ?: return
+        ttsManager.speak(question)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        ttsManager.release()
     }
 }
 
