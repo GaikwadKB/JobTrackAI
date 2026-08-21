@@ -1,47 +1,57 @@
-# Implementation Plan - Phase 17: Text-to-Speech Integration
+# Implementation Plan - Phase 18: Analytics & Dashboard
 
-This phase implements Text-to-Speech (TTS) capabilities for the AI Mock Interview feature as described in **Section 18**. This allows the AI interviewer to read the questions aloud, creating a fully immersive and professional practice environment.
+This phase implements the career analytics and professional dashboard as described in **Sections 19, 20, and 21**. We will transform the user's raw job search data into actionable insights using custom-built, lightweight Compose charts.
 
 ## Objective
-Integrate the Android `TextToSpeech` API to provide audible questions during mock interviews.
+Build a data-driven dashboard that visualizes application progress, interview conversion rates, and AI preparation scores.
 
 ## Proposed Changes
 
-### [feature:speech] - Domain Layer
-#### [NEW] [TextToSpeechManager.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/speech/src/main/java/com/jobtrackai/feature/speech/domain/TextToSpeechManager.kt)
-An interface defining the contract for speaking text:
-- `speak(text: String)`
-- `stop()`
-- `isReady`: A `StateFlow<Boolean>` indicating if the TTS engine is initialized.
+### [core:common]
+#### [NEW] [AnalyticsModels.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/common/src/main/java/com/jobtrackai/core/common/model/AnalyticsModels.kt)
+Domain models for stats: `ApplicationStats`, `InterviewStats`, `SkillDemand`.
 
-### [feature:speech] - Data Layer
-#### [NEW] [AndroidTextToSpeechManager.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/speech/src/main/java/com/jobtrackai/feature/speech/data/AndroidTextToSpeechManager.kt)
-Implementation using the native Android `TextToSpeech` class. It will:
-- Initialize the engine with the device's default locale.
-- Handle initialization callbacks.
-- Manage the audio focus and engine lifecycle.
+### [feature:analytics] - Domain Layer
+#### [NEW] [AnalyticsRepository.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/analytics/src/main/java/com/jobtrackai/feature/analytics/domain/repository/AnalyticsRepository.kt)
+Interface to fetch calculated statistics from local storage.
 
-### [feature:ai] - Integration
-#### [MODIFY] [AIMockInterviewScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/ai/src/main/java/com/jobtrackai/feature/ai/presentation/AIMockInterviewScreen.kt)
-- Inject `TextToSpeechManager`.
-- Add a "Speaker" icon next to the question text.
-- Automatically speak the question when it first appears (with a user-toggleable setting).
-- Ensure speech stops if the user navigates away or moves to the next question.
+#### [NEW] [GetAnalyticsUseCase.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/analytics/src/main/java/com/jobtrackai/feature/analytics/domain/usecase/GetAnalyticsUseCase.kt)
+Aggregates data from Jobs, Applications, and AI Sessions to produce a dashboard summary.
 
-### [core:di]
-#### [MODIFY] [SpeechModule.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/speech/src/main/java/com/jobtrackai/feature/speech/data/di/SpeechModule.kt)
-Provide the `TextToSpeechManager` implementation.
+### [feature:analytics] - Data Layer
+#### [NEW] [AnalyticsRepositoryImpl.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/analytics/src/main/java/com/jobtrackai/feature/analytics/data/repository/AnalyticsRepositoryImpl.kt)
+Calculates stats using Room DAOs (ApplicationDao, JobDao, AIDao).
+
+### [core:designsystem]
+#### [NEW] [Charts.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/designsystem/src/main/java/com/jobtrackai/core/designsystem/component/Charts.kt)
+Reusable, custom Compose-based chart components:
+- `BarChart`: For "Applications by Month".
+- `DonutChart`: For "Applications by Stage".
+- `LineChart`: For "AI Score Progress".
+
+### [feature:analytics] - Presentation Layer
+#### [NEW] [AnalyticsViewModel.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/analytics/src/main/java/com/jobtrackai/feature/analytics/presentation/AnalyticsViewModel.kt)
+Orchestrates the dashboard state.
+
+#### [NEW] [AnalyticsScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/analytics/src/main/java/com/jobtrackai/feature/analytics/presentation/AnalyticsScreen.kt)
+The primary UI showing the charts and high-level KPIs (Response Rate, Offer Rate).
+
+### [app]
+#### [MODIFY] [HomeScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/analytics/src/main/java/com/jobtrackai/feature/analytics/home/HomeScreen.kt)
+Update the Home tab to show a mini-dashboard summary instead of just a placeholder.
 
 ## User Review Required
 
-> [!NOTE]
-> **Audio Volume:** The app will use the "Music" (Media) volume stream for speech.
-> **Language Support:** We will default to the device language, but the UI will show an error if the engine cannot support the selected language.
+> [!TIP]
+> **Performance:** We will perform analytics calculations on the background thread using Room's aggregate functions and Kotlin's `groupBy` to keep the UI buttery smooth even with hundreds of applications.
 
 ## Verification Plan
 
+### Automated Tests
+- Unit tests for `AnalyticsRepositoryImpl` to verify that conversion rates (e.g., Application -> Interview) are calculated correctly.
+- Screenshot tests for the custom chart components.
+
 ### Manual Verification
-- Start a Mock Interview session.
-- Verify that the AI reads the first question automatically.
-- Tap the speaker icon to repeat the question.
-- Verify that clicking "Stop" or navigating back immediately kills the audio.
+- Add several job applications and interviews.
+- Navigate to the **Analytics** tab (Home).
+- Verify that the charts accurately reflect the data entered (e.g., if you have 2 "Applied" and 1 "Interview", the Donut chart should show a 2:1 ratio).

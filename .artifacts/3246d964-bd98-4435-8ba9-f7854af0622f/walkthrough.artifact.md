@@ -1,42 +1,36 @@
-# Walkthrough - Phase 17: Text-to-Speech Integration
+# Walkthrough - Phase 18: Analytics & Dashboard
 
-I have successfully integrated Text-to-Speech (TTS) into the AI Mock Interview, allowing the AI to read interview questions aloud for a more immersive practice experience.
+I have implemented the Analytics and Dashboard module, transforming raw job search data into visual insights and professional career metrics.
 
 ## Changes Made
 
-### Speech Engine Enhancement (`feature:speech`)
-- **[TextToSpeechManager.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/speech/src/main/java/com/jobtrackai/feature/speech/domain/TextToSpeechManager.kt)**: Defined the contract for audible text playback.
-- **[AndroidTextToSpeechManager.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/speech/src/main/java/com/jobtrackai/feature/speech/data/AndroidTextToSpeechManager.kt)**: Implemented the engine using the native Android `TextToSpeech` API. It automatically detects the system language for high-quality voice synthesis.
-- **Dependency Injection**: Updated the `SpeechModule` to provide the TTS manager app-wide.
+### Analytics Engine (`feature:analytics`)
+- **[AnalyticsRepositoryImpl.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/analytics/src/main/java/com/jobtrackai/feature/analytics/data/repository/AnalyticsRepositoryImpl.kt)**: Developed a calculation engine that aggregates data from Applications, Interviews, and AI Sessions. It calculates KPIs such as **Response Rate** and **Offer Conversion Rate**.
+- **[GetAnalyticsUseCase.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/analytics/src/main/java/com/jobtrackai/feature/analytics/domain/usecase/GetAnalyticsUseCase.kt)**: Created UseCases to cleanly expose these statistics to the presentation layer.
 
-### Mock Interview Integration (`feature:ai`)
-- **[AIInterviewViewModel.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/ai/src/main/java/com/jobtrackai/feature/ai/presentation/AIInterviewViewModel.kt)**:
-    - Wired the TTS engine to automatically speak the first question when an interview starts.
-    - Implemented `speakCurrentQuestion()` to allow replaying questions on demand.
-    - Added lifecycle safety to ensure speech stops if you navigate away or close the app.
-- **[AIMockInterviewScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/ai/src/main/java/com/jobtrackai/feature/ai/presentation/AIMockInterviewScreen.kt)**:
-    - Added a professional **"Speaker" (Volume Up)** icon next to every interview question.
-    - Users can tap this icon to have the AI repeat the question clearly.
+### Custom UI Components (`core:designsystem`)
+- **[Charts.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/core/designsystem/src/main/java/com/jobtrackai/core/designsystem/component/Charts.kt)**: Built lightweight, high-performance chart components using pure Jetpack Compose `Canvas`:
+    - **Donut Chart**: Visualizes the distribution of applications across the 10 search stages.
+    - **Bar Chart**: Shows the trend of job applications per month.
 
-### Infrastructure
-- **Audio Focus**: The system manages audio focus to ensure the AI's voice is heard clearly over background sounds.
-- **Memory Management**: The TTS engine is properly released in `onCleared()` to save resources.
+### Dashboard & Home Integration
+- **[AnalyticsScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/analytics/src/main/java/com/jobtrackai/feature/analytics/presentation/dashboard/AnalyticsScreen.kt)**: A professional statistics dashboard showing KPIs and detailed charts.
+- **[HomeScreen.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/analytics/src/main/java/com/jobtrackai/feature/analytics/home/HomeScreen.kt)**: Transformed the Home tab from a placeholder into a **Career Dashboard Summary**. It now displays your active application counts and high-level success rates.
 
 ## Verification
 
+### Automated Tests
+- **[AnalyticsRepositoryImplTest.kt](file:///E:/JobTrackAI-Phase1/JobTrackAI/feature/analytics/src/test/java/com/jobtrackai/feature/analytics/data/repository/AnalyticsRepositoryImplTest.kt)**: Verified that stats like response rate (Interviews / Applications) are calculated accurately.
+
 ### Manual Verification
-- **Build**: Successfully compiled the app with the new speech capabilities.
-- **Audio Test**:
-    1. Started a Mock Interview.
-    2. Verified the device spoke the first question automatically.
-    3. Tapped the speaker icon and verified the question was repeated.
-    4. Navigated back and verified the audio stopped immediately.
+- **Build**: Successfully compiled the app with the new analytics dependencies.
+- **Visuals**: Confirmed that the Home screen now shows real-time metrics derived from your local database.
 
 > [!TIP]
-> Make sure your device's **Media Volume** is turned up to hear the AI interviewer. The app uses your default system voice settings for the best localized experience.
-
-## Final Milestone Reached
-We have completed all the core interactive features for the JobTrack AI MVP! The app now supports full **Job Search**, **Kanban Tracking**, **Profile Management**, **AI Interviews**, **Voice-to-Text**, and **Text-to-Speech**.
+> You can see your live dashboard now!
+> 1. Apply to a few more jobs in the **Jobs** tab.
+> 2. Go to the **Home** tab to see your "Total Apps" and "Response Rate" update instantly.
+> 3. Notice the professional summary of your current career journey at the top of the screen.
 
 ## Next Steps
-We can now focus on **Phase 18: Analytics** to build the dashboard charts or proceed to **Phase 24: Final Polish** if you'd like to refine the UI/UX for a production release.
+We are now ready for **Phase 24: Final Polish**. We will refine the UI/UX, add animations, and ensure the app feels like a premium commercial product before final delivery.
