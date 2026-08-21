@@ -6,6 +6,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.jobtrackai.core.common.navigation.NavDestinations
+import com.jobtrackai.feature.ai.navigation.aiGraph
+import com.jobtrackai.feature.ai.navigation.navigateToAIInterviewSetup
 import com.jobtrackai.feature.analytics.navigation.homeScreen
 import com.jobtrackai.feature.applications.navigation.applicationsScreen
 import com.jobtrackai.feature.applications.navigation.navigateToApplicationDetails
@@ -46,7 +48,9 @@ fun JobTrackNavHost(
             navController = navController
         )
         
-        homeScreen()
+        homeScreen(
+            onStartAIInterviewClick = { navController.navigateToAIInterviewSetup() }
+        )
         jobsScreen(
             onJobClick = { jobId -> navController.navigateToJobDetails(jobId) },
             onBackClick = { navController.popBackStack() },
@@ -63,6 +67,7 @@ fun JobTrackNavHost(
         interviewsScreen(
             onBackClick = { navController.popBackStack() }
         )
+        aiGraph(navController = navController)
         profileScreen()
     }
 }
