@@ -1,5 +1,6 @@
 package com.jobtrackai.feature.interviews.list
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,6 +33,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jobtrackai.core.common.util.DateUtils
 import com.jobtrackai.core.designsystem.component.UiStateContent
+import com.jobtrackai.core.designsystem.component.shimmer
 import com.jobtrackai.feature.interviews.domain.model.Interview
 import com.jobtrackai.feature.interviews.presentation.list.InterviewListViewModel
 
@@ -49,9 +51,36 @@ fun InterviewsRoute(
     ) { padding ->
         UiStateContent(
             state = uiState,
-            modifier = Modifier.padding(padding)
+            modifier = Modifier.padding(padding),
+            loadingContent = { InterviewListLoading() }
         ) { interviews ->
             InterviewList(interviews = interviews)
+        }
+    }
+}
+
+@Composable
+fun InterviewListLoading() {
+    Column(modifier = Modifier.fillMaxSize()) {
+        repeat(5) {
+            InterviewCardShimmer()
+        }
+    }
+}
+
+@Composable
+fun InterviewCardShimmer() {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Box(modifier = Modifier.width(80.dp).height(12.dp).shimmer())
+            Spacer(modifier = Modifier.height(12.dp))
+            Box(modifier = Modifier.width(200.dp).height(20.dp).shimmer())
+            Spacer(modifier = Modifier.height(8.dp))
+            Box(modifier = Modifier.width(150.dp).height(16.dp).shimmer())
         }
     }
 }
