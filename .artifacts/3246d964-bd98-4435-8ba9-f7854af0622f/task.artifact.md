@@ -1,9 +1,13 @@
-# Tasks - Phase 17: Text-to-Speech Integration
+# Tasks - Phase 18: Analytics & Dashboard
 
-- `[x]` Define `TextToSpeechManager` interface in `feature:speech`
-- `[x]` Implement `AndroidTextToSpeechManager` in `feature:speech`
-- `[x]` Update `SpeechModule` in `feature:speech`
-- `[x]` Update `AIInterviewViewModel` to handle question speech logic
-- `[x]` Integrate `TextToSpeechManager` into `AIMockInterviewScreen` UI
-- `[x]` Add "Speak Question" toggle/replay button to UI
-- `[x]` Verify audio playback on device
+- `[x]` Define Analytics domain models in `core:common`
+- `[x]` Define `AnalyticsRepository` interface in `feature:analytics`
+- `[x]` Implement `AnalyticsRepositoryImpl` (Calculations via DAOs)
+- `[x]` Implement `GetAnalyticsUseCase`
+- `[x]` Create `Charts.kt` in `core:designsystem` (Bar, Donut, Line)
+- `[x]` Implement `AnalyticsViewModel`
+- `[x]` Implement `AnalyticsScreen` UI
+- `[x]` Update `HomeScreen` to show summary dashboard
+- `[x]` Setup Hilt for `feature:analytics`
+- `[x]` Unit tests for analytics calculations
+- `[ ]` Verify UI with sample data on device

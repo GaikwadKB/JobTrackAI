@@ -56,6 +56,8 @@ dependencies {
     implementation(project(":core:database"))
     implementation(project(":core:network"))
     implementation(project(":core:datastore"))
+    implementation(project(":core:sync"))
+    implementation(project(":feature:auth"))
     implementation(libs.androidx.navigation.compose)
     testImplementation(libs.junit4)
     testImplementation(libs.mockk)
